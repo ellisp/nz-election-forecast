@@ -1,5 +1,5 @@
-
-
+house_colours <- c("black", brewer.pal(3, "Set1"))
+names(house_colours) <-   c("Election result", "Reid Research", "Colmar Brunton", "Roy Morgan")
 #===========house effects on logit scale from previous elections=================
 # vector of just the seven main parties with a track record to use
 parties <- polls %>%
@@ -8,14 +8,14 @@ parties <- polls %>%
   filter(!Party %in% c("Destiny", "Progressive", "Mana", "Conservative")) %$%
   Party
 
-house_bias2 <- function(elect_years, pollsters){
+house_bias2 <- function(elect_years, pollsters, plot = FALSE){
   # Estimates house effects on the *logit* scale.
   # depends on these objects being in environment:
   # polls, parties
   # Note this is different to house_bias() from a previous post,
   # which drew graphics, and estimated bias on the original scale.
   
-  houses <- expand.grid(elect_years, pollsters)
+  houses <- expand.grid(elect_years, pollsters, stringsAsFactors = FALSE)
   names(houses) <- c("ElectionYear", "Pollster")
   
   for(j in 1:length(parties)){
@@ -51,6 +51,25 @@ house_bias2 <- function(elect_years, pollsters){
     
   }   
   
+  if(plot){
+    p <- houses %>%
+      gather(Party, `Polling overestimate`, -ElectionYear, -Pollster) %>%
+      ggplot(aes(x = ElectionYear, y = `Polling overestimate`, colour = Pollster)) +
+      geom_hline(yintercept = 0, colour = "black") +
+      geom_point() +
+      geom_line() +
+      facet_wrap(~Party, ncol = 4) +
+      scale_colour_manual(values = house_colours) +
+      scale_x_continuous("Election year", breaks = c(2005, 2008, 2011, 2014), limits = c(2004, 2015)) +
+      scale_y_continuous("Polling overestimate (logit scale)") +
+      theme(legend.position = c(0.9, 0.18)) +
+      ggtitle("Statistical forecast of election compared to actual result",
+              "Forecasts use time series methods based on pollsters' results, are not actual pollsters' forecasts") +
+      labs(caption = "Source: polls data collected by Wikipedia, available in the {nzelect} R package")
+    
+    print(p)
+  }
+  
   houses_av <- houses %>%
     gather(Party, Bias, -ElectionYear, -Pollster) %>%
     group_by(Party, Pollster) %>%
@@ -60,7 +79,8 @@ house_bias2 <- function(elect_years, pollsters){
 }
 
 hb1 <- house_bias2(elect_years = c(2005, 2008, 2011, 2014),
-                   pollsters   = c("Colmar Brunton", "Roy Morgan"))      
+                   pollsters   = c("Colmar Brunton", "Roy Morgan"),
+                   plot = TRUE)      
 
 hb2 <- house_bias2(elect_years = c(2011, 2014),
                    pollsters    = c("Reid Research", "Colmar Brunton", "Roy Morgan"))      

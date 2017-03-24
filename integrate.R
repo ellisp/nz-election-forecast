@@ -10,3 +10,4 @@ library(nzelect)
 library(GGally)
 library(boot) # for inv.logit
 library(mgcv)
+library(RColorBrewer)

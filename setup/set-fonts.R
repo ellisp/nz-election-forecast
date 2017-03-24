@@ -1,7 +1,8 @@
 
-font.add.google("Poppins", "myfont")
-showtext.auto()
-showtext.opts(dpi = 600)
+# library(showtext)
+# font.add.google("Poppins", "myfont")
+# showtext.auto()
+# showtext.opts(dpi = 600)
 
 theme_set(theme_light(base_family = thefont) + 
             theme(legend.position = "bottom") +

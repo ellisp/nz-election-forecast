@@ -12,8 +12,12 @@ library(boot) # for inv.logit
 library(mgcv)
 library(RColorBrewer)
 library(extrafont)
-library(showtext)
+
 
 thefont <- "Calibri"
 
 source("setup/set-fonts.R")
+
+
+source("method-gam/estimate-house-effects.R")
+source("method-gam/fit-gam.R")

@@ -80,10 +80,11 @@ house_bias2 <- function(elect_years, pollsters, plot = FALSE){
 
 hb1 <- house_bias2(elect_years = c(2005, 2008, 2011, 2014),
                    pollsters   = c("Colmar Brunton", "Roy Morgan"),
-                   plot = TRUE)      
+                   plot = FALSE)      
 
 hb2 <- house_bias2(elect_years = c(2011, 2014),
-                   pollsters    = c("Reid Research", "Colmar Brunton", "Roy Morgan"))      
+                   pollsters    = c("Reid Research", "Colmar Brunton", "Roy Morgan"),
+                   plot = FALSE)      
 
 house_effects <- hb2 %>%
   filter(Pollster == "Reid Research") %>%

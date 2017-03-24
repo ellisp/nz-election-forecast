@@ -11,3 +11,9 @@ library(GGally)
 library(boot) # for inv.logit
 library(mgcv)
 library(RColorBrewer)
+library(extrafont)
+library(showtext)
+
+thefont <- "Calibri"
+
+source("setup/set-fonts.R")

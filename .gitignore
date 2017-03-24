@@ -34,4 +34,4 @@ vignettes/*.pdf
 .Rproj.user
 
 # output
-./output/*
+output/*

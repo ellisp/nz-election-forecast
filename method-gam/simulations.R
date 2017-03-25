@@ -2,7 +2,7 @@
 # Depends on fit-gam.R
 
 #==========simulations============
-n <- 10000
+n <- 1000
 
 
 # estimated cov matrix from model.  This is less than when estimated
@@ -40,7 +40,10 @@ dev.off()
 # allocating vote for Maori seats done based on discussion at
 # http://www.newshub.co.nz/home/politics/2017/02/what-the-mana-maori-deal-would-ve-meant-in-the-2014-election.html
 # For lack of any better way of doing it, I give Labour a probability of winning proportionate to their
-# votes in the 2014 election compared to the combined Mana/Maori party votes
+# votes in the 2014 election compared to the combined Mana/Maori party votes, having knocked 10% off
+# those Mana/Maori party votes (this is the magic parameter "0.9" in the below - but I tried reducing this
+# as much as to 0.3 ie a collapse in the Maori/Mana vote, without changing the substantive conclusions 
+# from the overall simulation)
 m_votes_2014 <- data_frame(
   labour = c(9712, 7533, 8089, 9753, 8445, 12191, 5837),
   mana_maori = c(11548, 8695, 8475, 8928, 6887, 7612, 15208)
@@ -52,7 +55,7 @@ m_votes_2014 <- data_frame(
 
 
 # a filler data frame of the three parties that don't get any simulated electorate seats.
-# Note that NZ Firs isn't a certainty to get their seat, but it doesn't matter as they are 
+# Note that NZ First isn't really a certainty to get their seat, but it doesn't matter as they are 
 # almost certainly above the 5% threshold anyway, so we don't bother to simulate Northland
 filler <- data.frame(
   party = c("Conservative", "Green", "NZ First"),
@@ -103,29 +106,54 @@ seats <- seats %>%
   mutate(NatCoal = ACT + Conservative + National + `United Future` + Maori,
          LabGreen = Labour + Green,
          LabGreenMana = Labour + Green + Mana,
-         LabGreenManaNZFirst = Labour + Green + Mana + NZ_First)
+         LabGreenNZFirst = Labour + Green + NZ_First)
 seats$Total <- apply(seats[ , 1:9], 1, sum)
 
 
 #==================presentation=====================
 
 p <- seats %>%
-  select(National, NatCoal, LabGreen, LabGreenMana, LabGreenManaNZFirst) %>%
+  select(National, NatCoal, LabGreen, LabGreenMana, LabGreenNZFirst) %>%
   gather(Coalition, Seats) %>%
   ggplot(aes(x = Seats, colour = Coalition, fill = Coalition)) +
 #  geom_vline(xintercept = 60, colour = "black") +
-  geom_density(alpha = 0.5) 
+  geom_density(alpha = 0.5)  +
+  ggtitle("Likelihood of selected government-building scenarios",
+          "Most likely outcome is that New Zealand First are needed to build a majority.") +
+  labs(caption = "Source: https://ellisp.github.io")
 
+svg("./output/gam-results-density.svg", 8, 5)
 direct.label(p)
+dev.off()
 
-# This graph is interestin.
-# note that the correlations here are much further from zero than the 
+# Note that the correlations here are much further from zero than the 
 # correlations of votes, because of the seats algorithm
+panel.hist <- function(x, ...){
+  usr <- par("usr"); on.exit(par(usr))
+  par(usr = c(usr[1:2], 0, 1.5) )
+  h <- hist(x, plot = FALSE, breaks = unique(x))
+  breaks <- h$breaks; nB <- length(breaks)
+  y <- h$counts; y <- y/max(y)
+  rect(breaks[-nB], 0, breaks[-1], y, col = "steelblue", border = "grey75",...)
+}
+
+panel.cor <- function(x, y, digits = 2, prefix = "", cex.cor, ...){
+  usr <- par("usr"); on.exit(par(usr))
+  par(usr = c(0, 1, 0, 1))
+  r <- cor(x, y)
+  txt <- format(c(r, 0.123456789), digits = digits)[1]
+  txt <- paste0(prefix, txt)
+  text(0.5, 0.5, txt, cex = 1.5, col = "darkgreen")
+}
+
+svg("./output/gam-results-pairs.svg", 8, 7)
+par(family = thefont, bty = "n", font.main = 1)
 seats %>%
-  mutate(Other = ACT + `United Future` + Conservative + Mana + Maori) %>%
+  mutate(Other = as.ordered(ACT + `United Future` + Conservative + Mana + Maori)) %>%
   dplyr::select(Green, Labour, National, NZ_First, Other) %>%
-  ggpairs() +
-  ggtitle(paste("Possible outcomes for number of seats", ThisElection))
+  pairs(diag.panel = panel.hist, upper.panel = panel.cor,
+        main = paste("Possible outcomes for number of seats", ThisElection))
+dev.off()
 
 chances <- seats %>%
   summarise(`Nationals win by themselves` = mean(National > Total / 2),

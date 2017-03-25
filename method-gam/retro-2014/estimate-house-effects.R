@@ -2,8 +2,8 @@ house_colours <- c("black", brewer.pal(3, "Set1"))
 names(house_colours) <-   c("Election result", "Reid Research", "Colmar Brunton", "Roy Morgan")
 #===========house effects on logit scale from previous elections=================
 # vector of just the seven main parties with a track record to use
-parties <- polls %>%
-  filter(ElectionYear == 2017) %>%
+parties <- polls_retro %>%
+  filter(ElectionYear == 2014) %>%
   distinct(Party) %>%
   filter(!Party %in% c("Destiny", "Progressive", "Mana", "Conservative")) %$%
   Party
@@ -11,7 +11,7 @@ parties <- polls %>%
 house_bias2 <- function(elect_years, pollsters, plot = FALSE){
   # Estimates house effects on the *logit* scale.
   # depends on these objects being in environment:
-  # polls, parties
+  # polls_retro, parties, house_colours
   # Note this is different to house_bias() from a previous post,
   # which drew graphics, and estimated bias on the original scale.
   
@@ -22,7 +22,7 @@ house_bias2 <- function(elect_years, pollsters, plot = FALSE){
     the_party = parties[j]
     
     # election results:
-    results <- polls %>%
+    results <- polls_retro %>%
       filter(ElectionYear %in% elect_years & ElectionYear != 2002) %>%
       filter(Pollster == "Election result")  %>%
       filter(Party == the_party) 
@@ -31,7 +31,7 @@ house_bias2 <- function(elect_years, pollsters, plot = FALSE){
     for(i in 1:length(elect_years)){
       
       # Note we include *all* pollsters in the data for fitting the model
-      thedata <- polls %>%
+      thedata <- polls_retro %>%
         filter(ElectionYear == elect_years[i] & Pollster != "Election result") %>%
         filter(Party == the_party)
       
@@ -78,11 +78,11 @@ house_bias2 <- function(elect_years, pollsters, plot = FALSE){
   return(houses_av)
 }
 
-hb1 <- house_bias2(elect_years = c(2005, 2008, 2011, 2014),
+hb1 <- house_bias2(elect_years = c(2005, 2008, 2011),
                    pollsters   = c("Colmar Brunton", "Roy Morgan"),
                    plot = FALSE)      
 
-hb2 <- house_bias2(elect_years = c(2011, 2014),
+hb2 <- house_bias2(elect_years = c(2011),
                    pollsters    = c("Reid Research", "Colmar Brunton", "Roy Morgan"),
                    plot = FALSE)      
 

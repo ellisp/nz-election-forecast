@@ -6,16 +6,25 @@ set.seed(123)
 n <- 1000
 
 
-# estimated cov matrix from model.  This is less than when estimated
-# directly from the logit of the polls, because (I think) this is the 
-# covariance in the underlying moving mean, not the noise from the polls
-#
+# estimated cov matrix from model.  
 mod_cov <- solve(crossprod(mod$family$data$R)) 
 
+# estimated standard error for the predicted values
 se <- as.vector(mod_pred_elect[["se.fit"]])
+
+# In my first iterations I was using sigma1 as the covariance matrix for 
+# simulations.  But now I think this is understating the true randomeness we should expect
+#
+# sigma1 <- se %*% t(se) * cov2cor(mod_cov)
+
+# This method takes the covariance of the residuals (mod_cov) and
+# adds to it the uncertainty from the prediction.  A fairer method:
+sigma2 <- mod_cov 
+diag(sigma2) <- diag(sigma2) + sqrt(se)
+
 sims <- inv.logit(MASS::mvrnorm(n = n, 
                                 mu = mod_pred_elect[["fit"]],
-                                Sigma = se %*% t(se) * cov2cor(mod_cov))) %>%
+                                Sigma = sigma2)) %>%
   as_tibble()
 names(sims) <- parties
 
@@ -118,38 +127,21 @@ seats$Total <- apply(seats[ , 1:9], 1, sum)
 #==================presentation=====================
 
 p <- seats %>%
-  select(National, NatCoal, LabGreen, LabGreenMana, LabGreenNZFirst, NatCoalNZFirst) %>%
+  select(National, NatCoal, LabGreen, LabGreenNZFirst, NatCoalNZFirst) %>%
   gather(Coalition, Seats) %>%
   ggplot(aes(x = Seats, colour = Coalition, fill = Coalition)) +
   geom_density(alpha = 0.5)  +
+  scale_y_continuous(limits = c(0, 0.038)) +
   ggtitle("Likely seat counts for various combinations of parties",
           "Most likely outcome is that New Zealand First are needed to build a majority.") +
   labs(caption = "Source: https://ellisp.github.io",
        y = "Likelihood")
 
-svg("./output/gam-results-density.svg", 8, 5)
-print(direct.label(p))
+svg("./output/gam-results-density.svg", 9, 4)
+print(direct.label(p, "top.bumpup"))
 dev.off()
 
-# Note that the correlations here are much further from zero than the 
-# correlations of votes, because of the seats algorithm
-panel.hist <- function(x, ...){
-  usr <- par("usr"); on.exit(par(usr))
-  par(usr = c(usr[1:2], 0, 1.5) )
-  h <- hist(x, plot = FALSE, breaks = unique(x))
-  breaks <- h$breaks; nB <- length(breaks)
-  y <- h$counts; y <- y/max(y)
-  rect(breaks[-nB], 0, breaks[-1], y, col = "steelblue", border = "grey75",...)
-}
 
-panel.cor <- function(x, y, digits = 2, prefix = "", cex.cor, ...){
-  usr <- par("usr"); on.exit(par(usr))
-  par(usr = c(0, 1, 0, 1))
-  r <- cor(x, y)
-  txt <- format(c(r, 0.123456789), digits = digits)[1]
-  txt <- paste0(prefix, txt)
-  text(0.5, 0.5, txt, cex = 1.5, col = "darkgreen")
-}
 
 svg("./output/gam-results-pairs.svg", 8, 7)
 par(family = thefont, bty = "n", font.main = 1)
@@ -160,11 +152,12 @@ seats %>%
         main = paste("Possible outcomes for number of seats on", format(as.Date(ThisElection), "%d %B %Y")))
 dev.off()
 
+# space in `National ` is important as otherwise it gets confused with the original seat counts
 chances <- seats %>%
-  summarise(`National` = mean(National > Total / 2),
+  summarise(`National ` = mean(National > Total / 2),
             `National-led coalition similar to 2014` = mean(NatCoal > Total / 2 & National <= Total / 2),
             `Labour + Green` = mean(LabGreen > Total / 2),
-            `Labour + Green + Mana` = mean(LabGreen + Mana > Total / 2),
+            `Labour + Green + Mana` = mean(LabGreen + Mana > Total / 2 & LabGreen <= Total / 2),
             `NZ First needed to make government` = 
               mean((Green + Labour + Mana + NZ_First) >= Total / 2) - `Labour + Green + Mana`)
   
@@ -173,11 +166,13 @@ svg("./output/gam-final-chances-bar.svg", 8, 3)
 print(chances %>%
   gather(outcome, prob) %>%
   mutate(outcome = factor(outcome, levels = names(chances)[c(1,2,5,4,3)])) %>%
-  ggplot(aes(x = outcome, weight = prob)) +
-  geom_bar(fill = "steelblue") +
+  ggplot(aes(x = outcome, weight = prob, fill = outcome)) +
+  geom_bar() +
   geom_text(aes(label = paste0(round(prob * 100, 1), "%"), y = prob +.039), colour = "darkred") +
   coord_flip() +
   scale_y_continuous("Chance of happening", label = percent, limits = c(0, 1)) +
+  theme(legend.position = "none") +
+  scale_fill_viridis(discrete = TRUE, option = "C", begin = 0.1, end = 0.9) +
   labs(x = "", caption = "Source: https://ellisp.github.io") +
   ggtitle("Probability of different outcomes for the New Zealand 2017 General Election",
           paste("Modelling based on polls from 2014 election to", format(Sys.Date(), "%d %B %Y")))

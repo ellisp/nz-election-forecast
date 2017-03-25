@@ -13,11 +13,12 @@ library(mgcv)
 library(RColorBrewer)
 library(extrafont)
 library(directlabels)
+library(viridis)
 
 thefont <- "Calibri"
 
 source("setup/set-fonts.R")
-
+source("setup/functions.R")
 
 source("method-gam/estimate-house-effects.R")
 source("method-gam/fit-gam.R")

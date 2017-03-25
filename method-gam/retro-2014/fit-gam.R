@@ -28,7 +28,7 @@ parties <- unique(PollsElection$Party)
 parties <- sort(as.character(parties[!parties %in% c("Destiny", "Progressive")]))
 
 svg("./output/exploratory-plot-2014.svg", 8, 6)
-PollsElection %>%
+print(PollsElection %>%
   filter(Party %in% parties) %>%
   mutate(Party = fct_drop(Party)) %>%
   mutate(Party = fct_reorder(Party, VotingIntention, fun = max)) %>%
@@ -40,6 +40,7 @@ PollsElection %>%
   scale_y_continuous("logit(Voting Intention), after adjusting for house effects\n",
                      sec.axis = sec_axis(~inv.logit(.) * 100,
                                          name = "Voting Intention, after adjusting for house effects\n")) 
+)
 dev.off()
 
 
@@ -49,14 +50,16 @@ polls_w <- PollsElection %>%
   mutate(PollDate = paste(Pollster, MidDate),
          ID = 1:n()) %>%
   select(Party, VotingIntention, PollDate, MidDate) %>% 
-  spread(Party, VotingIntention, fill = 0) %>%
+  spread(Party, VotingIntention, fill = logit(0.0005)) %>%
   mutate(MidDate = as.numeric(MidDate))
 
 cors <- cor(polls_w[ , -(1:2)])
 
 svg("output/correlation-polls-2014.svg", 8, 7)
+print(
 ggcorr(polls_w[ , -(1:2)], label = TRUE, label_alpha = TRUE, label_round = 2) +
   ggtitle("Correlations in polling numbers, 2017 election")
+)
 dev.off()
 
 #===============modelling and predictions==============
@@ -109,7 +112,7 @@ fitted <- f %>%
 
 
 svg("./output/gam-vote-predictions-2014.svg", 9, 6)
-fitted %>%
+print(fitted %>%
   ggplot(aes(x = as.Date(MidDate, origin = "1970-01-01"), y = Vote)) +
   facet_wrap(~Party, scales = "free_y") +
   geom_ribbon(aes(ymin = Lower, ymax = Upper), alpha = 0.1, fill = "darkgreen") +
@@ -121,6 +124,7 @@ fitted %>%
   labs(x = "", caption = "Source: https://ellisp.github.io") +
   ggtitle("Party vote for the 20 September 2014 New Zealand General Election, if predicted six months earlier",
           "Points represent individual polls; adjusted for previous performance in predicting election results")
+)
 dev.off()  
 
 #=======================point prediction for election day================

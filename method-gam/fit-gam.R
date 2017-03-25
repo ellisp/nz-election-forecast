@@ -49,14 +49,14 @@ polls_w <- PollsElection %>%
   mutate(PollDate = paste(Pollster, MidDate),
          ID = 1:n()) %>%
   select(Party, VotingIntention, PollDate, MidDate) %>% 
-  spread(Party, VotingIntention, fill = 0) %>%
+  spread(Party, VotingIntention, fill = logit(0.0005)) %>%
   mutate(MidDate = as.numeric(MidDate))
 
 cors <- cor(polls_w[ , -(1:2)])
 
 svg("output/correlation-polls.svg", 8, 7)
-ggcorr(polls_w[ , -(1:2)], label = TRUE, label_alpha = TRUE, label_round = 2) +
-  ggtitle("Correlations in polling numbers, 2017 election")
+print(ggcorr(polls_w[ , -(1:2)], label = TRUE, label_alpha = TRUE, label_round = 2) +
+  ggtitle("Correlations in polling numbers, 2017 election"))
 dev.off()
 
 #===============modelling and predictions==============
@@ -109,7 +109,7 @@ fitted <- f %>%
 
 
 svg("./output/gam-vote-predictions.svg", 9, 6)
-fitted %>%
+print(fitted %>%
   ggplot(aes(x = as.Date(MidDate, origin = "1970-01-01"), y = Vote)) +
   facet_wrap(~Party, scales = "free_y") +
   geom_ribbon(aes(ymin = Lower, ymax = Upper), alpha = 0.1, fill = "darkgreen") +
@@ -120,7 +120,7 @@ fitted %>%
              size = 0.8, colour = "steelblue") +
   labs(x = "", caption = "Source: https://ellisp.github.io") +
   ggtitle("Predicted party vote for the 23 September 2017 New Zealand General Election",
-          "Points represent individual polls; adjusted for previous performance in predicting election results")
+          "Points represent individual polls; adjusted for previous performance in predicting election results"))
 dev.off()  
 
 #=======================point prediction for election day================

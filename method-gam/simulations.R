@@ -131,7 +131,7 @@ p <- seats %>%
   gather(Coalition, Seats) %>%
   ggplot(aes(x = Seats, colour = Coalition, fill = Coalition)) +
   geom_density(alpha = 0.5)  +
-  scale_y_continuous(limits = c(0, 0.038)) +
+  scale_y_continuous(limits = c(0, 0.041)) +
   ggtitle("Likely seat counts for various combinations of parties",
           "Most likely outcome is that New Zealand First are needed to build a majority.") +
   labs(caption = "Source: https://ellisp.github.io",

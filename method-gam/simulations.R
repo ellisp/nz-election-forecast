@@ -2,6 +2,7 @@
 # Depends on fit-gam.R
 
 #==========simulations============
+set.seed(123)
 n <- 1000
 
 
@@ -25,14 +26,17 @@ sims_tidy <- sims %>%
   mutate(Vote = Vote / sum(Vote))
 
 svg("./output/gam-vote-predictions-density.svg", 9, 6)
-sims_tidy %>%
+print(sims_tidy %>%
   ggplot(aes(x = Vote)) +
   geom_density(fill = "darkgreen", alpha = 0.1, colour = "grey50") +
   facet_wrap(~Party, scales = "free") +
   scale_x_continuous(label = percent) +
-  labs(x = "Predicted party vote on election day", caption = "Source: https://ellisp.github.io") +
+  labs(x = "Predicted party vote on election day", 
+       y = "Likelihood",
+       caption = "Source: https://ellisp.github.io") +
   ggtitle("Predicted party vote for the 23 September 2017 New Zealand General Election",
           "Simulations based on predictions from polling data")
+)
 dev.off()
 
 #===============simulate electorates================
@@ -106,24 +110,25 @@ seats <- seats %>%
   mutate(NatCoal = ACT + Conservative + National + `United Future` + Maori,
          LabGreen = Labour + Green,
          LabGreenMana = Labour + Green + Mana,
-         LabGreenNZFirst = Labour + Green + NZ_First)
+         LabGreenNZFirst = Labour + Green + NZ_First,
+         NatCoalNZFirst = NatCoal + NZ_First)
 seats$Total <- apply(seats[ , 1:9], 1, sum)
 
 
 #==================presentation=====================
 
 p <- seats %>%
-  select(National, NatCoal, LabGreen, LabGreenMana, LabGreenNZFirst) %>%
+  select(National, NatCoal, LabGreen, LabGreenMana, LabGreenNZFirst, NatCoalNZFirst) %>%
   gather(Coalition, Seats) %>%
   ggplot(aes(x = Seats, colour = Coalition, fill = Coalition)) +
-#  geom_vline(xintercept = 60, colour = "black") +
   geom_density(alpha = 0.5)  +
-  ggtitle("Likelihood of selected government-building scenarios",
+  ggtitle("Likely seat counts for various combinations of parties",
           "Most likely outcome is that New Zealand First are needed to build a majority.") +
-  labs(caption = "Source: https://ellisp.github.io")
+  labs(caption = "Source: https://ellisp.github.io",
+       y = "Likelihood")
 
 svg("./output/gam-results-density.svg", 8, 5)
-direct.label(p)
+print(direct.label(p))
 dev.off()
 
 # Note that the correlations here are much further from zero than the 
@@ -152,26 +157,29 @@ seats %>%
   mutate(Other = as.ordered(ACT + `United Future` + Conservative + Mana + Maori)) %>%
   dplyr::select(Green, Labour, National, NZ_First, Other) %>%
   pairs(diag.panel = panel.hist, upper.panel = panel.cor,
-        main = paste("Possible outcomes for number of seats", ThisElection))
+        main = paste("Possible outcomes for number of seats on", format(as.Date(ThisElection), "%d %B %Y")))
 dev.off()
 
 chances <- seats %>%
-  summarise(`Nationals win by themselves` = mean(National > Total / 2),
-            `National led coalition as per 2014` = mean(NatCoal > Total / 2 & National <= Total / 2),
-            `Labour + Green win by themselves` = mean(LabGreen > Total / 2),
-            `Labour + Green + Mana win` = mean(LabGreen + Mana > Total / 2),
-            `NZ First get leverage` = mean((Green + Labour + Mana + NZ_First) >= Total / 2) - `Labour + Green + Mana win`)
+  summarise(`National` = mean(National > Total / 2),
+            `National-led coalition similar to 2014` = mean(NatCoal > Total / 2 & National <= Total / 2),
+            `Labour + Green` = mean(LabGreen > Total / 2),
+            `Labour + Green + Mana` = mean(LabGreen + Mana > Total / 2),
+            `NZ First needed to make government` = 
+              mean((Green + Labour + Mana + NZ_First) >= Total / 2) - `Labour + Green + Mana`)
+  
 
-svg("./output/gam-final-chances-bar.svg", 8, 5)
-chances %>%
+svg("./output/gam-final-chances-bar.svg", 8, 3)
+print(chances %>%
   gather(outcome, prob) %>%
-  mutate(outcome = fct_reorder(outcome, prob)) %>%
+  mutate(outcome = factor(outcome, levels = names(chances)[c(1,2,5,4,3)])) %>%
   ggplot(aes(x = outcome, weight = prob)) +
   geom_bar(fill = "steelblue") +
-  geom_text(aes(label = paste0(round(prob * 100, 1), "%"), y = prob +.03), colour = "darkred") +
+  geom_text(aes(label = paste0(round(prob * 100, 1), "%"), y = prob +.039), colour = "darkred") +
   coord_flip() +
-  scale_y_continuous("Chance of happening", label = percent) +
+  scale_y_continuous("Chance of happening", label = percent, limits = c(0, 1)) +
   labs(x = "", caption = "Source: https://ellisp.github.io") +
   ggtitle("Probability of different outcomes for the New Zealand 2017 General Election",
-          paste("Modelling based on polls as at", format(Sys.Date(), "%d %B %Y")))
+          paste("Modelling based on polls from 2014 election to", format(Sys.Date(), "%d %B %Y")))
+)
 dev.off()

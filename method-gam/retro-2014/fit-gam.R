@@ -5,13 +5,13 @@
 
 #=========setup======================
 
-ThisElection <- "2017-09-23"
+ThisElection <- "2014-09-20"
 
 electionday <- data_frame(
   MidDate = as.numeric(as.Date(ThisElection))
 )
 
-PollsElection <- polls %>%
+PollsElection <- polls_retro %>%
   as_tibble() %>%
   filter(ElectionYear == substring(ThisElection, 1, 4)) %>%
   left_join(house_effects, by = c("Pollster", "Party")) %>%
@@ -27,7 +27,7 @@ PollsElection <- polls %>%
 parties <- unique(PollsElection$Party)
 parties <- sort(as.character(parties[!parties %in% c("Destiny", "Progressive")]))
 
-svg("./output/exploratory-plot.svg", 8, 6)
+svg("./output/exploratory-plot-2014.svg", 8, 6)
 PollsElection %>%
   filter(Party %in% parties) %>%
   mutate(Party = fct_drop(Party)) %>%
@@ -54,7 +54,7 @@ polls_w <- PollsElection %>%
 
 cors <- cor(polls_w[ , -(1:2)])
 
-svg("output/correlation-polls.svg", 8, 7)
+svg("output/correlation-polls-2014.svg", 8, 7)
 ggcorr(polls_w[ , -(1:2)], label = TRUE, label_alpha = TRUE, label_round = 2) +
   ggtitle("Correlations in polling numbers, 2017 election")
 dev.off()
@@ -108,7 +108,7 @@ fitted <- f %>%
   select(-se)
 
 
-svg("./output/gam-vote-predictions.svg", 9, 6)
+svg("./output/gam-vote-predictions-2014.svg", 9, 6)
 fitted %>%
   ggplot(aes(x = as.Date(MidDate, origin = "1970-01-01"), y = Vote)) +
   facet_wrap(~Party, scales = "free_y") +
@@ -119,7 +119,7 @@ fitted %>%
                            aes(y = inv.logit(VotingIntention), x = MidDate),
              size = 0.8, colour = "steelblue") +
   labs(x = "", caption = "Source: https://ellisp.github.io") +
-  ggtitle("Predicted party vote for the 23 September 2017 New Zealand General Election",
+  ggtitle("Party vote for the 20 September 2014 New Zealand General Election, if predicted six months earlier",
           "Points represent individual polls; adjusted for previous performance in predicting election results")
 dev.off()  
 
@@ -127,10 +127,10 @@ dev.off()
 mod_pred_elect <- predict(mod, newdata = electionday, se.fit = TRUE)
 
 pred_votes <- data.frame(
-  Lower = as.vector(mod_pred[["fit"]] -  1.96 * mod_pred[["se.fit"]]),
-  Midpoint = as.vector(mod_pred[["fit"]]),
-  Upper = as.vector(mod_pred[["fit"]] +  1.96 * mod_pred[["se.fit"]])) %>%
+  Lower = as.vector(mod_pred_elect[["fit"]] -  1.96 * mod_pred_elect[["se.fit"]]),
+  Midpoint = as.vector(mod_pred_elect[["fit"]]),
+  Upper = as.vector(mod_pred_elect[["fit"]] +  1.96 * mod_pred_elect[["se.fit"]])) %>%
   map_df(function(x){round(inv.logit(x) * 100, 1)}) %>%
   mutate(Party = parties)
 
-knitr::kable(pred_votes)
+knitr::kable(pred_votes[ , c(4,1,2,3)])

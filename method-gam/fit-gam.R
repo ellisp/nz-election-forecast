@@ -127,10 +127,10 @@ dev.off()
 mod_pred_elect <- predict(mod, newdata = electionday, se.fit = TRUE)
 
 pred_votes <- data.frame(
-  Lower = as.vector(mod_pred[["fit"]] -  1.96 * mod_pred[["se.fit"]]),
-  Midpoint = as.vector(mod_pred[["fit"]]),
-  Upper = as.vector(mod_pred[["fit"]] +  1.96 * mod_pred[["se.fit"]])) %>%
+  Lower = as.vector(mod_pred_elect[["fit"]] -  1.96 * mod_pred_elect[["se.fit"]]),
+  Midpoint = as.vector(mod_pred_elect[["fit"]]),
+  Upper = as.vector(mod_pred_elect[["fit"]] +  1.96 * mod_pred_elect[["se.fit"]])) %>%
   map_df(function(x){round(inv.logit(x) * 100, 1)}) %>%
   mutate(Party = parties)
 
-knitr::kable(pred_votes)
+knitr::kable(pred_votes[ , c(4,1,2,3)])

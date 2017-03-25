@@ -22,3 +22,8 @@ source("setup/set-fonts.R")
 source("method-gam/estimate-house-effects.R")
 source("method-gam/fit-gam.R")
 source("method-gam/simulations.R")
+write.csv(seats, file = "D:/Peter/Documents/blog/ellisp.github.io/elections/simulations.csv",
+          row.names = FALSE)
+
+source("method-gam/retro-2014/retro-integrate.R")
+source("method-gam/copy-files.R")

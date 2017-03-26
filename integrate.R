@@ -33,7 +33,7 @@ write.csv(seats, file = "D:/Peter/Documents/blog/ellisp.github.io/elections/simu
 
 # could turn the below into functions... or better, abstract the whole modelling process
 # so it works for an arbitrary election, on an arbitrary reference data
-source("method-gam/retro-2014/retro-integrate.R")
-source("method-gam/retro-2014-1week/retro-integrate.R")
+# source("method-gam/retro-2014/retro-integrate.R")
+# source("method-gam/retro-2014-1week/retro-integrate.R")
 
 source("method-gam/copy-files.R")

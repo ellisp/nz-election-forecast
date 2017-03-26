@@ -5,13 +5,14 @@
 
 #=========setup======================
 
-ThisElection <- "2017-09-23"
+ThisElection <- "2014-09-20"
+
 
 electionday <- data_frame(
   MidDate = as.numeric(as.Date(ThisElection))
 )
 
-PollsElection <- polls %>%
+PollsElection <- polls_retro %>%
   as_tibble() %>%
   filter(ElectionYear == substring(ThisElection, 1, 4)) %>%
   left_join(house_effects, by = c("Pollster", "Party")) %>%
@@ -25,25 +26,11 @@ PollsElection <- polls %>%
 # adds to 100, because of the bias corrections
 
 parties <- unique(PollsElection$Party)
-parties <- sort(as.character(parties[!parties %in% c("Destiny", "Progressive", "Opportunities")]))
-
-svg("./output/exploratory-plot.svg", 8, 6)
-PollsElection %>%
-  filter(Party %in% parties) %>%
-  mutate(Party = fct_drop(Party)) %>%
-  mutate(Party = fct_reorder(Party, VotingIntention, fun = max)) %>%
-  ggplot(aes(x = MidDate, y = VotingIntention)) +
-  geom_point(aes(colour = Pollster)) +
-  geom_line(aes(colour = Pollster)) +
-  geom_smooth(se = FALSE) +
-  facet_wrap(~Party, scales = "free_y") +
-  scale_y_continuous("logit(Voting Intention), after adjusting for house effects\n",
-                     sec.axis = sec_axis(~inv.logit(.) * 100,
-                                         name = "Voting Intention, after adjusting for house effects\n")) 
-dev.off()
+parties <- sort(as.character(parties[!parties %in% c("Destiny", "Progressive")]))
 
 
-#===========correlations (on logit scale)================
+
+#===========wide data (on logit scale)================
 polls_w <- PollsElection %>%
   filter(Party %in% parties) %>%
   mutate(PollDate = paste(Pollster, MidDate),
@@ -51,13 +38,6 @@ polls_w <- PollsElection %>%
   select(Party, VotingIntention, PollDate, MidDate) %>% 
   spread(Party, VotingIntention, fill = logit(0.0005)) %>%
   mutate(MidDate = as.numeric(MidDate))
-
-cors <- cor(polls_w[ , -(1:2)])
-
-svg("output/correlation-polls.svg", 8, 7)
-print(ggcorr(polls_w[ , -(1:2)], label = TRUE, label_alpha = TRUE, label_round = 2) +
-  ggtitle("Correlations in polling numbers, 2017 election"))
-dev.off()
 
 #===============modelling and predictions==============
 
@@ -108,7 +88,7 @@ fitted <- f %>%
   select(-se)
 
 
-svg("./output/gam-vote-predictions.svg", 9, 6)
+svg("./output/gam-vote-predictions-2014-1week.svg", 9, 6)
 print(fitted %>%
   ggplot(aes(x = as.Date(MidDate, origin = "1970-01-01"), y = Vote)) +
   facet_wrap(~Party, scales = "free_y") +
@@ -119,18 +99,8 @@ print(fitted %>%
                            aes(y = inv.logit(VotingIntention), x = MidDate),
              size = 0.8, colour = "steelblue") +
   labs(x = "", caption = "Source: https://ellisp.github.io") +
-  ggtitle("Predicted party vote for the 23 September 2017 New Zealand General Election",
-          "Points represent individual polls; adjusted for previous performance in predicting election results"))
+  ggtitle("Party vote for the 20 September 2014 New Zealand General Election, if predicted 1 week earlier",
+          "Points represent individual polls; adjusted for previous performance in predicting election results")
+)
 dev.off()  
 
-#=======================point prediction for election day================
-mod_pred_elect <- predict(mod, newdata = electionday, se.fit = TRUE)
-
-pred_votes <- data.frame(
-  Lower = as.vector(mod_pred_elect[["fit"]] -  1.96 * mod_pred_elect[["se.fit"]]),
-  Midpoint = as.vector(mod_pred_elect[["fit"]]),
-  Upper = as.vector(mod_pred_elect[["fit"]] +  1.96 * mod_pred_elect[["se.fit"]])) %>%
-  map_df(function(x){round(inv.logit(x) * 100, 1)}) %>%
-  mutate(Party = parties)
-
-knitr::kable(pred_votes[ , c(4,1,2,3)])

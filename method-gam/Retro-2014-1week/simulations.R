@@ -9,12 +9,12 @@ n <- 1000
 mod_cov <- solve(crossprod(mod$family$data$R)) 
 # estimated standard error of forecast mean:
 se <- as.vector(mod_pred_elect[["se.fit"]])
-sigma2 <- mod_cov 
-diag(sigma2) <- diag(sigma2) + sqrt(se)
+se3 <- as.vector(sqrt(se ^ 2 + exp(coef(mod_var)[1] + coef(mod_var)[2] * mod_pred_elect[["fit"]])))
+sigma3 <- se3 %*% t(se3) * cov2cor(mod_cov)
 
 sims <- inv.logit(MASS::mvrnorm(n = n, 
                                 mu = mod_pred_elect[["fit"]],
-                                Sigma = sigma2)) %>%
+                                Sigma = sigma3)) %>%
   as_tibble()
 names(sims) <- parties
 
@@ -103,7 +103,7 @@ p <- seats %>%
   gather(Coalition, Seats) %>%
   ggplot(aes(x = Seats, colour = Coalition, fill = Coalition)) +
   geom_density(alpha = 0.5)  +
-  scale_y_continuous(limits = c(0, 0.05)) +
+  scale_y_continuous() +
   ggtitle("Likely seat counts for various combinations of parties",
           "Most likely outcome is that New Zealand First are needed to build a majority.") +
   labs(caption = "Source: https://ellisp.github.io",

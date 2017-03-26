@@ -20,7 +20,12 @@ thefont <- "Calibri"
 source("setup/set-fonts.R")
 source("setup/functions.R")
 
+# house effects, and variance of election results compared to predictions,
+# using all available data
 source("method-gam/estimate-house-effects.R")
+source("method-gam/estimate-election-variance.R")
+
+# Fit model and simulations for this current election year
 source("method-gam/fit-gam.R")
 source("method-gam/simulations.R")
 write.csv(seats, file = "D:/Peter/Documents/blog/ellisp.github.io/elections/simulations.csv",

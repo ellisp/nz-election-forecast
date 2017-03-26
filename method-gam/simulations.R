@@ -9,22 +9,35 @@ n <- 1000
 # estimated cov matrix from model.  
 mod_cov <- solve(crossprod(mod$family$data$R)) 
 
-# estimated standard error for the predicted values
+# estimated standard error for the predicted values.  This bit is uncontroversial.
 se <- as.vector(mod_pred_elect[["se.fit"]])
 
 # In my first iterations I was using sigma1 as the covariance matrix for 
-# simulations.  But now I think this is understating the true randomeness we should expect
-#
+# simulations.  But now I think this is understating the true randomness we should expect
 # sigma1 <- se %*% t(se) * cov2cor(mod_cov)
 
-# This method takes the covariance of the residuals (mod_cov) and
-# adds to it the uncertainty from the prediction.  A fairer method:
-sigma2 <- mod_cov 
-diag(sigma2) <- diag(sigma2) + sqrt(se)
+# This second method takes the covariance of the residuals (mod_cov) and
+# adds to it the uncertainty from the prediction.  It ends up being too *much*
+# variance, because the election is treated as just another small sample poll
+# sigma2 <- mod_cov 
+#diag(sigma2) <- diag(sigma2) + sqrt(se)
 
+# The third method takes the observed mean squared error from previous elections compared to
+# where a gam fits the lines (see estimate-election-variance.R) and treats that as the 
+# individual variance of the actual election observation.  This is added to the sum of the
+# standard errors for the prediction of the latent party vote variable to create an expected
+# standard deviation of the distribution for each party mean.  The correlation matrix
+# from the GAM predicting this year's eleciton is used as a basis, scaled up by this standard
+# deviation, to create a new covariance matrix
+se3 <- as.vector(sqrt(se ^ 2 + exp(coef(mod_var)[1] + coef(mod_var)[2] * mod_pred_elect[["fit"]])))
+sigma3 <- se3 %*% t(se3) * cov2cor(mod_cov)
+
+# round(sigma1, 2) # way too small
+# round(sigma2, 2) # too big
+# round(sigma3, 3) # generally (not always) in between
 sims <- inv.logit(MASS::mvrnorm(n = n, 
                                 mu = mod_pred_elect[["fit"]],
-                                Sigma = sigma2)) %>%
+                                Sigma = sigma3)) %>%
   as_tibble()
 names(sims) <- parties
 
@@ -131,7 +144,7 @@ p <- seats %>%
   gather(Coalition, Seats) %>%
   ggplot(aes(x = Seats, colour = Coalition, fill = Coalition)) +
   geom_density(alpha = 0.5)  +
-  scale_y_continuous(limits = c(0, 0.041)) +
+  scale_y_continuous(limits = c(0, 0.2)) +
   ggtitle("Likely seat counts for various combinations of parties",
           "Most likely outcome is that New Zealand First are needed to build a majority.") +
   labs(caption = "Source: https://ellisp.github.io",

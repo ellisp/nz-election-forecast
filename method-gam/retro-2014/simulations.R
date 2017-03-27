@@ -9,7 +9,7 @@ n <- 1000
 mod_cov <- solve(crossprod(mod$family$data$R)) 
 # estimated standard error of forecast mean:
 se <- as.vector(mod_pred_elect[["se.fit"]])
-se3 <- as.vector(sqrt(se ^ 2 + exp(coef(mod_var)[1] + coef(mod_var)[2] * mod_pred_elect[["fit"]])))
+se3 <- as.vector(sqrt(se ^ 2 + pmin(exp(coef(mod_var)[1] + coef(mod_var)[2] * mod_pred_elect[["fit"]]), 1)))
 sigma3 <- se3 %*% t(se3) * cov2cor(mod_cov)
 
 sims <- inv.logit(MASS::mvrnorm(n = n, 

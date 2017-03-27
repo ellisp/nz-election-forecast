@@ -29,7 +29,7 @@ se <- as.vector(mod_pred_elect[["se.fit"]])
 # standard deviation of the distribution for each party mean.  The correlation matrix
 # from the GAM predicting this year's eleciton is used as a basis, scaled up by this standard
 # deviation, to create a new covariance matrix
-se3 <- as.vector(sqrt(se ^ 2 + exp(coef(mod_var)[1] + coef(mod_var)[2] * mod_pred_elect[["fit"]])))
+se3 <- as.vector(sqrt(se ^ 2 + pmin(exp(coef(mod_var)[1] + coef(mod_var)[2] * mod_pred_elect[["fit"]]), 1)))
 sigma3 <- se3 %*% t(se3) * cov2cor(mod_cov)
 
 # round(sigma1, 2) # way too small

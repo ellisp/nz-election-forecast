@@ -5,7 +5,7 @@ names(house_colours) <-   c("Election result", "Reid Research", "Colmar Brunton"
 parties <- polls %>%
   filter(ElectionYear == 2017) %>%
   distinct(Party) %>%
-  filter(!Party %in% c("Destiny", "Progressive", "Mana", "Conservative", "Opportunities")) %$%
+  filter(!Party %in% c("Destiny", "Progressive", "Mana", "Conservative", "Opportunities", "TOP")) %$%
   Party
 
 house_bias2 <- function(elect_years, pollsters, plot = FALSE){

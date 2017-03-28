@@ -25,7 +25,7 @@ PollsElection <- polls %>%
 # adds to 100, because of the bias corrections
 
 parties <- unique(PollsElection$Party)
-parties <- sort(as.character(parties[!parties %in% c("Destiny", "Progressive", "Opportunities")]))
+parties <- sort(as.character(parties[!parties %in% c("Destiny", "Progressive", "Opportunities", "TOP")]))
 
 svg("./output/exploratory-plot.svg", 8, 6)
 PollsElection %>%

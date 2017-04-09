@@ -94,4 +94,4 @@ house_effects <- hb2 %>%
 
 house_effects_vars <- house_effects %>%
   group_by(Party) %>%
-  summarise(SE = sqrt(sum(SampVar)))
+  summarise(SE = sqrt(sum(SampVar))) 

@@ -6,7 +6,7 @@ set.seed(123)
 n <- 1000
 
 
-# estimated cov matrix from model.  
+# estimated cov matrix from GAM.  
 mod_cov <- solve(crossprod(mod$family$data$R)) 
 
 # estimated standard error for the predicted values.  This bit is uncontroversial.
@@ -29,8 +29,25 @@ se <- as.vector(mod_pred_elect[["se.fit"]])
 # standard deviation of the distribution for each party mean.  The correlation matrix
 # from the GAM predicting this year's eleciton is used as a basis, scaled up by this standard
 # deviation, to create a new covariance matrix
-se3 <- as.vector(sqrt(se ^ 2 + pmin(exp(coef(mod_var)[1] + coef(mod_var)[2] * mod_pred_elect[["fit"]]), 1)))
-sigma3 <- se3 %*% t(se3) * cov2cor(mod_cov)
+se3 <- as.vector(sqrt(se ^ 2 + 
+                        pmin(exp(coef(mod_var)[1] + coef(mod_var)[2] * mod_pred_elect[["fit"]]), 1)))
+
+
+# Now I want to add some uncertainty from the fact that house effects were only estimated.
+# Basically, these are estimates from small amounts of data - and probably are changing
+# over time too.  However, an argument could be made that this step isn't needed, as
+# it is already taken into account in the estimate of se from comparing previous elections
+# to the house effect corrected results.  For now, I'm leaving in this bit of extra randomness.
+house_effects_vars <- data_frame(Party = parties) %>%
+  # add in parties without enough track record to have a house effect estimate:
+  left_join(house_effects_vars, by = "Party") %>%
+  # replace NAs with the maximum observed house effect:
+  mutate(SE = ifelse(is.na(SE), max(SE, na.rm = TRUE), SE))
+
+
+se4 <- sqrt(se3 ^ 2 + house_effects_vars$SE ^ 2)
+
+sigma3 <- se4 %*% t(se4) * cov2cor(mod_cov)
 
 # round(sigma1, 2) # way too small
 # round(sigma2, 2) # too big

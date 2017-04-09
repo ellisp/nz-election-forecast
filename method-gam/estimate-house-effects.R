@@ -71,9 +71,10 @@ house_bias2 <- function(elect_years, pollsters, plot = FALSE){
   }
   
   houses_av <- houses %>%
-    gather(Party, Bias, -ElectionYear, -Pollster) %>%
+    gather(Party, BiasOrig, -ElectionYear, -Pollster) %>%
     group_by(Party, Pollster) %>%
-    summarise(Bias = mean(Bias))
+    summarise(Bias = mean(BiasOrig),
+              SampVar = var(BiasOrig) / n())
   
   return(houses_av)
 }
@@ -90,3 +91,7 @@ house_effects <- hb2 %>%
   filter(Pollster == "Reid Research") %>%
   rbind(hb1) %>%
   arrange(Party, Pollster)
+
+house_effects_vars <- house_effects %>%
+  group_by(Party) %>%
+  summarise(SE = sqrt(sum(SampVar)))

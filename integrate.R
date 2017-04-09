@@ -28,6 +28,8 @@ source("method-gam/estimate-election-variance.R")
 # Fit model and simulations for this current election year
 source("method-gam/fit-gam.R")
 source("method-gam/simulations.R")
+
+# next line is specific to my (PE) setup, saving a copy of the seat simulations for my webpage:
 write.csv(seats, file = "D:/Peter/Documents/blog/ellisp.github.io/elections/simulations.csv",
           row.names = FALSE)
 

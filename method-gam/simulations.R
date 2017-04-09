@@ -191,3 +191,17 @@ print(chances %>%
           paste("Modelling based on polls from 2014 election to", format(Sys.Date(), "%d %B %Y")))
 )
 dev.off()
+
+svg("./output/gam-final-chances-histogram.svg", 8, 4)
+seats %>%
+  gather(Party, Number) %>%
+  mutate(Party = gsub("_", " ", Party)) %>%
+  mutate(Party = fct_reorder(Party, Number)) %>%
+  ggplot(aes(x = Number, y = ..density..)) +
+  facet_wrap(~Party, scales = "free", ncol = 5) +
+  geom_histogram(binwidth = 1, fill = "steelblue", alpha = 0.5, colour = "steelblue") +
+  labs(x = "Number of seats", y = "Probability",
+       caption = "http://ellisp.github.io") +
+  ggtitle("Simulated election outcomes, 2017",
+          "Forecasts based on opinion poll trends, calibrated to previous election outcomes")
+dev.off()

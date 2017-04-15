@@ -35,7 +35,7 @@ write.csv(seats, file = "D:/Peter/Documents/blog/ellisp.github.io/elections/simu
 
 #=======for shiny app========
 save(parties, file = "nz-election-2017/parties.rda")
-save(seats, file = "nz-election-2017/seats.rda")
+save(sims, file = "nz-election-2017/sims.rda")
 
 # could turn the below into functions... or better, abstract the whole modelling process
 # so it works for an arbitrary election, on an arbitrary reference data

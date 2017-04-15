@@ -34,6 +34,7 @@ shinyUI(fluidPage(
     column(6,
            
            ggvisOutput("perc_plot"),
+           htmlOutput("prob"),
            ggvisOutput("seats_plot")
            )
     )

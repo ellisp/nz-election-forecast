@@ -8,8 +8,8 @@ files <- c("gam-final-chances-bar.svg",
            "gam-results-pairs.svg",
            "gam-vote-predictions-density.svg",
            "gam-vote-predictions.svg",
-           "gam-vote-predictions-2014.svg",
-           "gam-final-chances-bar-2014.svg",
+#           "gam-vote-predictions-2014.svg",
+#           "gam-final-chances-bar-2014.svg",
            "gam-final-chances-histogram.svg")
 
 file.copy(from = paste0("output/", files), 

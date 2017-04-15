@@ -3,7 +3,7 @@
 
 #==========simulations============
 set.seed(123)
-n <- 1000
+n <- 5000
 
 
 # estimated cov matrix from GAM.  

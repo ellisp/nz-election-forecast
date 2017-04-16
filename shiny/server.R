@@ -5,7 +5,7 @@ library(tidyr)
 library(tibble)
 library(nzelect)
 
-load("sims.rda")
+load("sims.rda") # simulated party vote
 load("parties.rda")
 load("parties_ordered.rda")
 
@@ -21,14 +21,15 @@ filler <- data.frame(
   sim = rep(1:n, each = 3)
 )
 
-# Define server logic required to draw a histogram
 shinyServer(function(input, output) {
+  # version of parties chosen by user without macrons:
   parties2 <- reactive({
     tmp <- gsub("M.ori", "Maori", input$coal_members)
     return(tmp)
   })
   
   #---------------simulate seats----------------
+  # Turn the Maori seat chances chosen by user into a data frame:
   maori_probs <- reactive({
     tmp <- data.frame(labour = c(input$m1, input$m2, input$m3, 
                                  input$m4, input$m5, input$m6, input$m7)) %>%
@@ -36,12 +37,7 @@ shinyServer(function(input, output) {
     return(tmp)
   })
 
-  
-  # see https://en.wikipedia.org/wiki/M%C4%81ori_electorates for the true names of the Maori electorates.
-  # For convenience I call them m1 : m7.
-  # Also note - the procedure below often gives zero electorate seats to National.  This doesn't
-  # impact on seat allocation as they always exceed the 5% party vote threshhold; they only
-  # need to be in the simulation at all for the off chance they take Epsom off ACT.
+  # Allocate individual electorate seats for each row of the simulation:  
   electorate_sims <- reactive({data_frame(
     orahiu = sample(c("United Future", "Labour"), prob = c(input$ohariu, 1-input$ohariu), size = n, replace = TRUE),
     epsom = sample(c("ACT", "National"), prob = c(input$epsom, 1-input$epsom), size = n, replace = TRUE),
@@ -62,6 +58,7 @@ shinyServer(function(input, output) {
     spread(party, seats, fill = 0)
   })
   
+  # Allocate seats on basis of party vote and electorates
   seats <- reactive({t(sapply(1:n, function(i){
     allocate_seats(votes = as.numeric(sims[i, ]), 
                    electorate = as.numeric(electorate_sims()[i, -1]),
@@ -70,7 +67,7 @@ shinyServer(function(input, output) {
     as_tibble()
   })
   
-  
+  # long tidy version of the reactive (user-modified) seats data frame:
   seats_long <- reactive({
     seats() %>%
     mutate(sim = 1:n()) %>%
@@ -78,6 +75,7 @@ shinyServer(function(input, output) {
   })
   
   #--------------build coalitions-------------
+  # seats and percent of seats for user-chosen coaltion:
   the_seats <- reactive({
     # we want the colour of the biggest party mentioned
     # in the user-chosen party list:
@@ -95,16 +93,16 @@ shinyServer(function(input, output) {
       mutate(Colour = tmp_col[1, "Colour"])
   })
 
+  # chance of winning (needs to be based on percent):
   chance <- reactive({
-    # chance of winning (needs to be based on percent)
     tmp <- as.vector(mean(the_seats()$coal_perc > 0.5))
     tmp <- paste("<p>Chance of coalition of<i>", paste(input$coal_members, collapse =" + "), 
                  "</i> winning >50% of seats is<b>", format(round(tmp, 2), nsmall = 2), "</b></p>")
     return(tmp)
   })
-  
   output$prob <- renderText({chance()})
   
+  #==============graphics x 2========================
     the_seats %>%
     ggvis(~coal_perc) %>%
       layer_densities(fill := ~Colour, stroke:= ~Colour) %>%

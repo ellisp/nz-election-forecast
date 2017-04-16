@@ -7,9 +7,10 @@ library(nzelect)
 
 load("sims.rda")
 load("parties.rda")
+load("parties_ordered.rda")
 
-n <- 5000 
-
+n <- 1000 
+sims <- sims[1:n, ]
 
 # a filler data frame of the three parties that don't get any simulated electorate seats.
 # Note that NZ First isn't really a certainty to get their seat, but it doesn't matter as they are 
@@ -32,7 +33,6 @@ shinyServer(function(input, output) {
     tmp <- data.frame(labour = c(input$m1, input$m2, input$m3, 
                                  input$m4, input$m5, input$m6, input$m7)) %>%
       mutate(other = 1 - labour)
-    print(tmp)
     return(tmp)
   })
 
@@ -79,39 +79,50 @@ shinyServer(function(input, output) {
   
   #--------------build coalitions-------------
   the_seats <- reactive({
-    seats_long() %>%
+    # we want the colour of the biggest party mentioned
+    # in the user-chosen party list:
+    tmp_col <- parties_ordered %>%
+      filter(party %in% parties2()) 
+    
+    # sum up the seats (and the percent of seats - depends on
+    # how many seats in parliament) for the given coalition,
+    # and add on the biggest party colour as part of the data frame:
+    tmp_df <- seats_long() %>%
     group_by(sim) %>%
     summarise(coal_seats = sum(seats[ party %in% parties2()]),
               coal_perc = coal_seats / sum(seats)) %>%
-      ungroup()
+      ungroup() %>%
+      mutate(Colour = tmp_col[1, "Colour"])
   })
-  
+
   chance <- reactive({
+    # chance of winning (needs to be based on percent)
     tmp <- as.vector(mean(the_seats()$coal_perc > 0.5))
     tmp <- paste("<p>Chance of coalition of", paste(input$coal_members, collapse =", "), 
-                 "winning is<b>", round(tmp, 2), "</b>.</p>")
+                 "winning >50% of seats is<b>", format(round(tmp, 2), nsmall = 2), "</b></p>")
     return(tmp)
   })
   
   output$prob <- renderText({chance()})
   
-  
     the_seats %>%
     ggvis(~coal_perc) %>%
-      layer_densities() %>%
+      layer_densities(fill := ~Colour, stroke:= ~Colour) %>%
       set_options(height = 275) %>%
       add_axis("x", title ="Percentage of total seats", format = "%") %>%
       bind_shiny("perc_plot")
-    
+  
     the_seats %>%
       ggvis(~coal_seats) %>%
-      layer_histograms() %>%
+      layer_histograms(fill := ~Colour, stroke:= "white") %>%
       set_options(height = 275) %>%
       add_axis("x", title = "Number of seats") %>%
-      add_axis("y", title = "Number of simulations out of 5,000") %>%
+      add_axis("y", title = paste("Number of simulations out of", format(n, big.mark = ","))) %>%
       bind_shiny("seats_plot")
     
-      
+    observeEvent(input$reset_input, {
+      shinyjs::reset("parameters")
+    })      
   
 
 })

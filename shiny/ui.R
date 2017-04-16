@@ -69,8 +69,9 @@ either Māori or Labour.")
            ggvisOutput("seats_plot"),
 HTML("<p>All predictions should be taken with great caution.  Modelled party vote estimates are based 
 on poll numbers from 2014 to 2017, adjusted for how well each polling firm has predicted parties' actual
-vote in previous elections.  The modelled uncertainty includes both polling uncertainty and randomness 
-on election day.  See the <a href='http://ellisp.github.io/elections/elections.html'>
+vote in previous elections.  The modelled uncertainty takes into account polling sampling error, the 
+challenge of forecasting in time, and randomness on election day.  
+See the <a href='http://ellisp.github.io/elections/elections.html'>
 full description of the method</a> or the <a href = 'https://github.com/ellisp/nz-election-forecast'>
 source code</a> for more details.  <a href='http://ellisp.github.io/elections/elections.html'>
 Comments are welcome.</a></p>")           

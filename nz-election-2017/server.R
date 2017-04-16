@@ -98,8 +98,8 @@ shinyServer(function(input, output) {
   chance <- reactive({
     # chance of winning (needs to be based on percent)
     tmp <- as.vector(mean(the_seats()$coal_perc > 0.5))
-    tmp <- paste("<p>Chance of coalition of", paste(input$coal_members, collapse =", "), 
-                 "winning >50% of seats is<b>", format(round(tmp, 2), nsmall = 2), "</b></p>")
+    tmp <- paste("<p>Chance of coalition of<i>", paste(input$coal_members, collapse =" + "), 
+                 "</i> winning >50% of seats is<b>", format(round(tmp, 2), nsmall = 2), "</b></p>")
     return(tmp)
   })
   
@@ -114,7 +114,7 @@ shinyServer(function(input, output) {
   
     the_seats %>%
       ggvis(~coal_seats) %>%
-      layer_histograms(fill := ~Colour, stroke:= "white") %>%
+      layer_histograms(fill := ~Colour, stroke:= "white", width = 1) %>%
       set_options(height = 275) %>%
       add_axis("x", title = "Number of seats") %>%
       add_axis("y", title = paste("Number of simulations out of", format(n, big.mark = ","))) %>%

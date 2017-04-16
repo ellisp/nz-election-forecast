@@ -10,6 +10,11 @@ maxsl <- 0.95
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
   useShinyjs(),
+  tags$style(HTML("
+@import url('https://fonts.googleapis.com/css?family=Lato');
+                      
+body {font-family: 'Lato', 'Lucida Grande', Verdana, Lucida, Helvetica, Arial, Calibri, sans-serif;}
+")),
   
   
   # Application title
@@ -45,25 +50,30 @@ p("Northland electorate, while of interest, is not included here as NZ First are
 5% threshold even if they do not retain the electorate.")
        ),
     column(3, hr(),
-           h4("Maori electorates"),
-       sliderInput("m1", "Ikaroa-Rawhiti - probability of Labour win", min = minsl, max = maxsl, value = 0.48),
-       sliderInput("m2", "Tainui - probability of Labour win", min = minsl, max = maxsl, value = 0.49),
-       sliderInput("m3", "Tamaki Makaurau - probability of Labour win", min = minsl, max = maxsl, value = 0.51),
-       sliderInput("m4", "Te Tai Hauauru - probability of Labour win", min = minsl, max = maxsl, value = 0.55),
-       sliderInput("m5", "Te Tai Tokerau - probability of Labour win", min = minsl, max = maxsl, value = 0.58),
-       sliderInput("m6", "Te Tai Tonga - probability of Labour win", min = minsl, max = maxsl, value = 0.64),
+           # see http://www.newshub.co.nz/home/politics/2017/02/what-the-mana-maori-deal-would-ve-meant-in-the-2014-election.html
+           h4("Māori electorates"),
+       sliderInput("m1", "Tāmaki Makaurau - probability of Labour win", min = minsl, max = maxsl, value = 0.49),
+       sliderInput("m2", "Te Tai Hauāuru - probability of Labour win", min = minsl, max = maxsl, value = 0.52),
+       sliderInput("m3", "Ikaroa-Rāwhiti - probability of Labour win", min = minsl, max = maxsl, value = 0.55),
+       sliderInput("m4", "Te Tai Tonga - probability of Labour win", min = minsl, max = maxsl, value = 0.58),
+       sliderInput("m5", "Te Tai Tokerau - probability of Labour win", min = minsl, max = maxsl, value = 0.48),
+       sliderInput("m6", "Hauraki-Waikato - probability of Labour win", min = minsl, max = maxsl, value = 0.64),
        sliderInput("m7", "Wairaki - probability of Labour win", min = minsl, max = maxsl, value = 0.30),
-       p("Te Tai Tokerau is assumed to go to either Mana or Labour; all other Maori electorates assumed to go to
-either Maori or Labour.")
+       p("Te Tai Tokerau is assumed to go to either Mana or Labour; all other Māori electorates assumed to go to
+either Māori or Labour.")
     ),
     column(6,
            h3("Probability distribution of won seats"),
            ggvisOutput("perc_plot"),
            htmlOutput("prob"),
            ggvisOutput("seats_plot"),
-HTML("<p>All predictions should be taken with great caution.  See the <a href='http://ellisp.github.io/elections/elections.html'>
-full description of the method</a> or the <a href = 'https://github.com/ellisp/nz-election-forecast'
-sourec code</a> for more details.</p>")           
+HTML("<p>All predictions should be taken with great caution.  Modelled party vote estimates are based 
+on poll numbers from 2014 to 2017, adjusted for how well each polling firm has predicted parties' actual
+vote in previous elections.  The modelled uncertainty includes both polling uncertainty and randomness 
+on election day.  See the <a href='http://ellisp.github.io/elections/elections.html'>
+full description of the method</a> or the <a href = 'https://github.com/ellisp/nz-election-forecast'>
+source code</a> for more details.  <a href='http://ellisp.github.io/elections/elections.html'>
+Comments are welcome.</a></p>")           
            )
     )
     

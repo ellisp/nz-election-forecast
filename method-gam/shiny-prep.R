@@ -12,3 +12,5 @@ parties_ordered <- parties_df %>%
 save(parties, file = "nz-election-2017/parties.rda")
 save(sims, file = "nz-election-2017/sims.rda")
 save(parties_ordered, file = "nz-election-2017/parties_ordered.rda")
+
+deployApp("nz-election-2017", appName = "nz-election-2017", account = "ellisp")

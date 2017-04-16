@@ -14,6 +14,7 @@ library(RColorBrewer)
 library(extrafont)
 library(directlabels)
 library(viridis)
+library(rsconnect)
 
 thefont <- "Calibri"
 

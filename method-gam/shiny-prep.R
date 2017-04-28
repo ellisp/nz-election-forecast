@@ -9,8 +9,8 @@ parties_ordered <- parties_df %>%
             "ACT", "United Future", "Mana", "Conservative")),
     by = "party")
 
-save(parties, file = "nz-election-2017/parties.rda")
-save(sims, file = "nz-election-2017/sims.rda")
-save(parties_ordered, file = "nz-election-2017/parties_ordered.rda")
+save(parties, file = "shiny/parties.rda")
+save(sims, file = "shiny/sims.rda")
+save(parties_ordered, file = "shiny/parties_ordered.rda")
 
-deployApp("shiny", appName = "nz-election-2017", account = "ellisp")
+deployApp("shiny", appName = app_name, account = "ellisp")

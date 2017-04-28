@@ -35,6 +35,9 @@ write.csv(seats, file = "D:/Peter/Documents/blog/ellisp.github.io/elections/simu
           row.names = FALSE)
 
 #=======for shiny app========
+# set which shiny app to deploy: nz-election-2017 for produ, nz-election-2017-test for testing
+app_name <- "nz-election-2017-test"
+# app_name <- "nz-election-2017"
 source("method-gam/shiny-prep.R")
 
 # could turn the below into functions... or better, abstract the whole modelling process

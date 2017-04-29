@@ -160,8 +160,9 @@ p <- seats %>%
   select(National, NatCoal, LabGreen, LabGreenNZFirst, NatCoalNZFirst) %>%
   gather(Coalition, Seats) %>%
   ggplot(aes(x = Seats, colour = Coalition, fill = Coalition)) +
-  geom_density(alpha = 0.5)  +
-  scale_y_continuous(limits = c(0, 0.2)) +
+  geom_histogram(alpha = 0.5, binwidth = 1, position = "identity")  +
+#  facet_wrap(~Coalition)+
+  scale_y_continuous() +
   ggtitle("Likely seat counts for various combinations of parties",
           "Most likely outcome is that New Zealand First are needed to build a majority.") +
   labs(caption = "Source: https://ellisp.github.io",

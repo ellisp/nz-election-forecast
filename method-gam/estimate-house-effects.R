@@ -8,7 +8,7 @@ parties <- polls %>%
   filter(!Party %in% c("Destiny", "Progressive", "Mana", "Conservative", "Opportunities", "TOP")) %$%
   Party
 
-house_bias2 <- function(elect_years, pollsters, plot = FALSE){
+house_bias2 <- function(elect_years, pollsters, plot = FALSE, shrinkage = 0.7){
   # Estimates house effects on the *logit* scale.
   # depends on these objects being in environment:
   # polls, parties
@@ -73,7 +73,7 @@ house_bias2 <- function(elect_years, pollsters, plot = FALSE){
   houses_av <- houses %>%
     gather(Party, BiasOrig, -ElectionYear, -Pollster) %>%
     group_by(Party, Pollster) %>%
-    summarise(Bias = mean(BiasOrig),
+    summarise(Bias = mean(BiasOrig) * shrinkage,
               SampVar = var(BiasOrig) / n())
   
   return(houses_av)

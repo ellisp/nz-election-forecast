@@ -15,11 +15,18 @@ library(extrafont)
 library(directlabels)
 library(viridis)
 library(rsconnect)
+library(rstan)
 
 thefont <- "Calibri"
 
 source("setup/set-fonts.R")
 source("setup/functions.R")
+
+# compile Stan function used, if hasn't already been done
+disc <- rnorm(10)
+x <- list(disc = disc, N = length(disc))
+fit <- stan(file = 'method-gam/estimate-house-effects.stan', data = x, control = list(adapt_delta = 0.995))
+
 
 # house effects, and variance of election results compared to predictions,
 # using all available data

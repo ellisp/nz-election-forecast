@@ -34,15 +34,15 @@ se3 <- as.vector(sqrt(se ^ 2 +
 
 
 # Now I want to add some uncertainty from the fact that house effects were only estimated.
-# Basically, these are estimates from small amounts of data - and probably are changing
-# over time too.  However, an argument could be made that this step isn't needed, as
-# it is already taken into account in the estimate of se from comparing previous elections
-# to the house effect corrected results.  For now, I'm leaving in this bit of extra randomness.
 house_effects_vars <- data_frame(Party = parties) %>%
   # add in parties without enough track record to have a house effect estimate:
-  left_join(house_effects_vars, by = "Party") %>%
+  left_join(house_effects, by = "Party") %>%
   # replace NAs with the maximum observed house effect:
-  mutate(SE = ifelse(is.na(SE), max(SE, na.rm = TRUE), SE))
+  mutate(SE = ifelse(is.na(SE), max(SE, na.rm = TRUE), SE)) %>%
+  group_by(Party) %>%
+  summarise(SE = sqrt(mean(SE ^ 2))) %>%
+  # next step is to force the ordering to be the same as in `parties`
+  right_join(data_frame(Party = parties))
 
 
 se4 <- sqrt(se3 ^ 2 + house_effects_vars$SE ^ 2)

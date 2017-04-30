@@ -1,5 +1,6 @@
 house_colours <- c("black", brewer.pal(3, "Set1"))
 names(house_colours) <-   c("Election result", "Reid Research", "Colmar Brunton", "Roy Morgan")
+
 #===========house effects on logit scale from previous elections=================
 # vector of just the seven main parties with a track record to use
 parties <- polls %>%
@@ -8,7 +9,7 @@ parties <- polls %>%
   filter(!Party %in% c("Destiny", "Progressive", "Mana", "Conservative", "Opportunities", "TOP")) %$%
   Party
 
-house_bias2 <- function(elect_years, pollsters, plot = FALSE, shrinkage = 0.7){
+house_bias3 <- function(elect_years, pollsters){
   # Estimates house effects on the *logit* scale.
   # depends on these objects being in environment:
   # polls, parties
@@ -51,47 +52,37 @@ house_bias2 <- function(elect_years, pollsters, plot = FALSE, shrinkage = 0.7){
     
   }   
   
-  if(plot){
-    p <- houses %>%
-      gather(Party, `Polling overestimate`, -ElectionYear, -Pollster) %>%
-      ggplot(aes(x = ElectionYear, y = `Polling overestimate`, colour = Pollster)) +
-      geom_hline(yintercept = 0, colour = "black") +
-      geom_point() +
-      geom_line() +
-      facet_wrap(~Party, ncol = 4) +
-      scale_colour_manual(values = house_colours) +
-      scale_x_continuous("Election year", breaks = c(2005, 2008, 2011, 2014), limits = c(2004, 2015)) +
-      scale_y_continuous("Polling overestimate (logit scale)") +
-      theme(legend.position = c(0.9, 0.18)) +
-      ggtitle("Statistical forecast of election compared to actual result",
-              "Forecasts use time series methods based on pollsters' results, are not actual pollsters' forecasts") +
-      labs(caption = "Source: polls data collected by Wikipedia, available in the {nzelect} R package")
-    
-    print(p)
+  output <- data_frame(Party = character(), Pollster = character(),
+                       Bias = numeric(), SampVar = numeric())
+  
+  for(i in pollsters){
+    for(j in parties){
+      disc <- houses[houses$Pollster == i, j]
+      x <- list(disc = disc, N = length(disc))
+      fit <- stan(file = 'method-gam/estimate-house-effects.stan', data = x, control = list(adapt_delta = 0.995))
+      fit_e <- extract(fit)$house_effect
+      tmp <- data_frame(
+        Party = j,
+        Pollster = i,
+        Bias = mean(fit_e), 
+        SampVar = sd(fit_e) ^ 2)
+      output <- rbind(output, tmp)
+    }
   }
-  
-  houses_av <- houses %>%
-    gather(Party, BiasOrig, -ElectionYear, -Pollster) %>%
-    group_by(Party, Pollster) %>%
-    summarise(Bias = mean(BiasOrig) * shrinkage,
-              SampVar = var(BiasOrig) / n())
-  
-  return(houses_av)
-}
+  output %>%
+    arrange(Party, Pollster) %>%
+    return()
+  }
 
-hb1 <- house_bias2(elect_years = c(2005, 2008, 2011, 2014),
-                   pollsters   = c("Colmar Brunton", "Roy Morgan"),
-                   plot = FALSE)      
+hb1 <- house_bias3(elect_years = c(2005, 2008, 2011, 2014),
+                   pollsters   = c("Colmar Brunton", "Roy Morgan"))      
 
-hb2 <- house_bias2(elect_years = c(2011, 2014),
-                   pollsters    = c("Reid Research", "Colmar Brunton", "Roy Morgan"),
-                   plot = FALSE)      
+# Note we include all three pollsters even though we wi
+hb2 <- house_bias3(elect_years = c(2011, 2014),
+                   pollsters    = c("Reid Research"))      
 
 house_effects <- hb2 %>%
-  filter(Pollster == "Reid Research") %>%
   rbind(hb1) %>%
-  arrange(Party, Pollster)
+  arrange(Party, Pollster) %>%
+  mutate(SE = sqrt(SampVar))
 
-house_effects_vars <- house_effects %>%
-  group_by(Party) %>%
-  summarise(SE = sqrt(sum(SampVar))) 

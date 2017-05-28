@@ -17,3 +17,12 @@ file.copy(from = paste0("output/", files),
           overwrite = TRUE)
 
 
+projdir <- setwd("output/")
+for(i in files[grepl("svg$", files)]){
+  output <- gsub("svg$", "png", i)
+  cmd <- paste0('\"C:\\Program Files\\ImageMagick-7.0.2-Q16\\magick\"', " ", i, " ", output)
+  system(cmd)
+  
+}
+
+setwd(projdir)

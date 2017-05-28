@@ -9,7 +9,7 @@ load("sims.rda") # simulated party vote
 load("parties.rda")
 load("parties_ordered.rda")
 
-n <- 1000 
+n <- 2000 
 sims <- sims[1:n, ]
 
 # a filler data frame of the three parties that don't get any simulated electorate seats.
@@ -110,12 +110,19 @@ shinyServer(function(input, output) {
       add_axis("x", title ="Percentage of total seats", format = "%") %>%
       bind_shiny("perc_plot")
   
+  tool_func <- function(x){
+    seat_bar <- (x[[2]] + x[[3]]) / 2
+    prob_bar <-  round(x[[4]] / n * 100, 1)
+    paste0("<p>Probability of ", seat_bar, " seats is ", prob_bar, "%</p>")
+  }
+  
     the_seats %>%
       ggvis(~coal_seats) %>%
       layer_histograms(fill := ~Colour, stroke:= "white", width = 1) %>%
       set_options(height = 275) %>%
       add_axis("x", title = "Number of seats") %>%
       add_axis("y", title = paste("Number of simulations out of", format(n, big.mark = ","))) %>%
+      add_tooltip(html = tool_func) %>%
       bind_shiny("seats_plot")
     
     observeEvent(input$reset_input, {

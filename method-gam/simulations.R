@@ -174,7 +174,7 @@ dev.off()
 
 
 
-svg("./output/gam-results-pairs.svg", 8, 7)
+png("./output/gam-results-pairs.png", 8 * 300, 7 * 300, res = 300)
 par(family = thefont, bty = "n", font.main = 1)
 seats %>%
   mutate(Other = as.ordered(ACT + `United Future` + Conservative + Mana + Maori)) %>%
@@ -186,11 +186,12 @@ dev.off()
 # space in `National ` is important as otherwise it gets confused with the original seat counts
 chances <- seats %>%
   summarise(`National ` = mean(National > Total / 2),
-            `National-led coalition similar to 2014` = mean(NatCoal > Total / 2 & National <= Total / 2),
-            `Labour + Green` = mean(LabGreen > Total / 2),
-            `Labour + Green + Mana` = mean(LabGreen + Mana > Total / 2 & LabGreen <= Total / 2),
-            `NZ First needed to make government` = 
-              mean((Green + Labour + Mana + NZ_First) >= Total / 2) - `Labour + Green + Mana`)
+            `National needs a coalition similar to 2014` = mean(NatCoal > Total / 2 & National <= Total / 2),
+            `Labour + Green win by themselves` = mean(LabGreen > Total / 2),
+            `Labour + Green + Mana need\na coalition with NZ First` = 
+              mean((Green + Labour + NZ_First) >= Total / 2) - `Labour + Green win by themselves`,
+            `Labour + Greens + Mana + NZ First\nexact tie with National-led coalition` =
+              mean((LabGreen + Mana + NZ_First) == Total / 2))
   
 
 svg("./output/gam-final-chances-bar.svg", 8, 3)
@@ -205,13 +206,13 @@ print(chances %>%
   theme(legend.position = "none") +
   scale_fill_viridis(discrete = TRUE, option = "C", begin = 0.1, end = 0.9) +
   labs(x = "", caption = "Source: https://ellisp.github.io") +
-  ggtitle("Probability of different outcomes for the New Zealand 2017 General Election",
-          paste("Modelling based on polls from 2014 election to", format(Sys.Date(), "%d %B %Y")))
+  ggtitle("Probable outcomes for the New Zealand 2017 General Election",
+          paste("Modelling based on polls from 2014 to", format(Sys.Date(), "%d %B %Y")))
 )
 dev.off()
 
 svg("./output/gam-final-chances-histogram.svg", 8, 4)
-seats %>%
+print(seats %>%
   gather(Party, Number) %>%
   mutate(Party = gsub("_", " ", Party)) %>%
   mutate(Party = fct_reorder(Party, Number)) %>%
@@ -221,5 +222,5 @@ seats %>%
   labs(x = "Number of seats", y = "Probability",
        caption = "http://ellisp.github.io") +
   ggtitle("Simulated election outcomes, 2017",
-          "Forecasts based on opinion poll trends, calibrated to previous election outcomes")
+          "Forecasts based on opinion poll trends, calibrated to previous election outcomes"))
 dev.off()

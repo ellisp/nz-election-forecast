@@ -1,3 +1,13 @@
+# Estimates the "house effects" for each combination of polling firm and party.
+# Note there is built into this (in estimate-house-effects.stan) a prior distribution
+# for the effect of N(0, 0.15), indicating we expect if true party intended vote is
+# 50%, 90% of house effects are between -6% and +6%, which seems reasonably uninformative while
+# still having some centring/shrinkage effect.
+# Good discussion of priors at https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations
+# Note from "https://cran.r-project.org/web/packages/rstan/vignettes/rstan.html":
+#  "(Just be careful: the second argument to Stan’s normal  distribution is the standard deviation, 
+# not the variance as is usual in statistical notation.)".  It follows R norm in this.
+
 house_colours <- c("black", brewer.pal(3, "Set1"))
 names(house_colours) <-   c("Election result", "Reid Research", "Colmar Brunton", "Roy Morgan")
 

@@ -5,7 +5,7 @@ dir("output")
 
 files <- c("gam-final-chances-bar.svg",
            "gam-results-density.svg",
-           "gam-results-pairs.svg",
+           "gam-results-pairs.png",
            "gam-vote-predictions-density.svg",
            "gam-vote-predictions.svg",
 #           "gam-vote-predictions-2014.svg",

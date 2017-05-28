@@ -22,6 +22,9 @@ thefont <- "Calibri"
 source("setup/set-fonts.R")
 source("setup/functions.R")
 
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
 # compile Stan function used, if hasn't already been done
 disc <- rnorm(10)
 x <- list(disc = disc, N = length(disc))

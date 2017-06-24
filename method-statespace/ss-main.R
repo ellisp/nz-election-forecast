@@ -22,32 +22,123 @@ elections <- polls %>%
   ungroup() %>%
   select(ACT:Other)
 
-parties <- names(elections)
+polls2 <- polls %>%
+  mutate(Party = gsub("M.ori", "Maori", Party)) %>%
+  mutate(Party = fct_other(Party, keep = c("ACT", "National", "NZ First", "Labour", "Green", "Maori"))) %>%
+  group_by(Party, Pollster, MidDate, ElectionYear) %>%
+  summarise(VotingIntention = sum(VotingIntention, na.rm = TRUE)) %>%
+  mutate(VotingIntention = ifelse(is.na(VotingIntention), 0, VotingIntention)) %>%
+  filter(Pollster != "Election result") %>%
+  filter(ElectionYear %in% c(2014, 2017)) %>%
+  spread(Party, VotingIntention, fill = 0) %>%
+  ungroup() %>%
+  mutate(MidDateNumber = as.numeric(MidDate - as.Date("2011-11-25"))) # election was 26 November 2011
+  
+pollsters <- unique(polls2$Pollster)
 
-days_between_elections <- as.integer(diff(as.Date(c("2011-11-26", "2014-09-20", "2017-09-23")))) + 1
+polls3 <- lapply(pollsters, function(x){
+  filter(polls2, Pollster == x)
+})
 
-days_between_elections <- c(30, 25)
+parties_ss <- names(elections)
+
+election_dates <-  as.Date(c("2011-11-26", "2014-09-20", "2017-09-23"))
+days_between_elections <- as.integer(diff(election_dates)) + 1
 
 d1 <- list(mu_start = as.numeric(elections[1, ]), 
            mu_finish = as.numeric(elections[2, ]), 
-           n_parties = length(parties),
-           n_days = days_between_elections)
+           
+           n_parties = length(parties_ss),
+           n_days = days_between_elections, 
 
-m1 <- stan(file = "method-statespace/ss-simple.stan", data = d1, chains = 1)
+                      y1_n = nrow(polls3[[1]]),
+           y1_values = polls3[[1]][ , 4:10],
+           y1_days = as.numeric(polls3[[1]]$MidDateNumber),
+           
+           y2_n = nrow(polls3[[2]]),
+           y2_values = polls3[[2]][ , 4:10],
+           y2_days = as.numeric(polls3[[2]]$MidDateNumber),
+           
+           y3_n = nrow(polls3[[3]]),
+           y3_values = polls3[[3]][ , 4:10],
+           y3_days = as.numeric(polls3[[3]]$MidDateNumber),
+           
+           y4_n = nrow(polls3[[4]]),
+           y4_values = polls3[[4]][ , 4:10],
+           y4_days = as.numeric(polls3[[4]]$MidDateNumber),
+           
+           y5_n = nrow(polls3[[5]]),
+           y5_values = polls3[[5]][ , 4:10],
+           y5_days = as.numeric(polls3[[5]]$MidDateNumber))
+
+m1 <- stan(file = "method-statespace/ss-simple.stan", data = d1, chains = 4)
 
 s1 <- summary(m1, pars = "mu")$summary %>%
   as_tibble() %>%
-  mutate(party = rep(parties, sum(days_between_elections)),
-         day = rep(1:sum(days_between_elections), each = length(parties)))
+  mutate(Party = rep(parties_ss, sum(days_between_elections)),
+         day = rep(1:sum(days_between_elections), each = length(parties_ss)),
+         day = as.Date(day, origin = "2011-11-25"))
+
+
 
 p1 <- s1 %>%
-  ggplot(aes(x = day, y = mean, colour = party, fill = party)) +
-  geom_line() +
-  geom_ribbon(aes(ymin = `2.5%`, ymax = `97.5%`), alpha = 0.7) +
+  ggplot(aes(x = day, y = mean, colour = Party, fill = Party)) +
+  geom_point(data = gather(polls2, Party, VotingIntention, -Pollster, -MidDate, -ElectionYear, -MidDateNumber),
+             aes(x = MidDate, y = VotingIntention), colour = "black", size = 0.5) +
+  geom_line(colour = "black") +
+  geom_ribbon(aes(ymin = `2.5%`, ymax = `97.5%`), alpha = 0.3, colour = NA) +
   scale_colour_manual(values = parties_v2) +
-  scale_fill_manual(values = parties_v2)
-p1
+  scale_fill_manual(values = parties_v2) +
+  labs(x = "", y = "Party vote") +
+  facet_wrap(~Party, scales = "free_y") +
+  theme(legend.position= "none") +
+  scale_y_continuous(label = percent) +
+  geom_vline(xintercept = as.numeric(election_dates), colour = "black") +
+  ggtitle("Voting intention from the 2011 to the 2017 elections",
+          paste("State-space modelling based on polls from 2011 to", format(Sys.Date(), "%d %B %Y"))) +
+  labs(caption = "https://ellisp.github.io/elections/elections.html")
 
 
-summary(m1, pars = "sigma")
-parties
+svg("./output/state-space-ribbons.svg", 10, 6)  
+print(p1)
+grid.text(0.8, 0.2, label = "hello")
+dev.off()
+
+
+# standard deviation - in percentage points (ie not proportions)
+# of the daily innovations
+summary(m1, pars = "sigma")$summary %>%
+  (function(x){round( x * 100, 3)}) %>%
+  as_tibble() %>%
+  select(mean, se_mean) %>%
+  mutate(party = parties_ss)
+# The main difference between the GAM model and the state space model
+# is that the state space model lets the major parties latent vote
+# change much quicker.  So as at end of June 2017, the National vote
+# bounces up (along with the budget bounce) in the state space model,
+# whereas the GAM model still has them trending downwards.
+
+
+# house effects
+svg("./output/state-space-house-effects.svg", 8, 6)
+print(
+data.frame(d = round(summary(m1, pars = "d")$summary[, "mean"] * 100, 2),
+           pollster = rep(pollsters, each = length(parties_ss)),
+           party = rep(parties_ss, length(pollsters))) %>%
+  arrange(party) %>%
+  ggplot(aes(y = party, colour = pollster, x = d)) +
+  geom_point(size = 2) +
+  labs(x = "Average house effect (positive numbers mean the pollster over-estimates vote for that party)",
+       y = "")
+)
+dev.off()
+
+# extract the simulations for the final election day
+sims_ss <- data.frame(rstan::extract(m1, "mu")$mu[ , sum(days_between_elections), ]) %>%
+  mutate(Conservative = runif(n(), 0, 0.01),
+         `United Future` = runif(n(), 0, 0.01),
+         Mana = runif(n(), 0, 0.01))
+names(sims_ss)[1:length(parties_ss)] <- parties_ss
+sims_ss <- select(sims_ss, -Other)
+
+simulate_seats(sims_ss, prefix = "state-space")

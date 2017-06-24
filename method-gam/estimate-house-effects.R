@@ -70,7 +70,7 @@ house_bias3 <- function(elect_years, pollsters){
       disc <- houses[houses$Pollster == i, j]
       x <- list(disc = disc, N = length(disc))
       fit <- stan(file = 'method-gam/estimate-house-effects.stan', data = x, control = list(adapt_delta = 0.995))
-      fit_e <- extract(fit)$house_effect
+      fit_e <- rstan::extract(fit)$house_effect
       tmp <- data_frame(
         Party = j,
         Pollster = i,

@@ -5,12 +5,6 @@
 
 #=========setup======================
 
-ThisElection <- "2017-09-23"
-
-electionday <- data_frame(
-  MidDate = as.numeric(as.Date(ThisElection))
-)
-
 PollsElection <- polls %>%
   as_tibble() %>%
   filter(ElectionYear == substring(ThisElection, 1, 4)) %>%

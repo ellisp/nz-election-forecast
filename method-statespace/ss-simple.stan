@@ -38,12 +38,13 @@ parameters {
   real<lower=0,upper=1> mu[sum(n_days), n_parties];     // underlying state of vote intention, as a proportion (not percentage)
   real<lower=0> sigma[n_parties];                       // standard deviations for daily innovations for each party
   real d[5, n_parties];                                 // house effects for 5 pollsters and n_parties parties
+  // real<lower=0.1> s[n_parties];                                     // sd multiplier for each party
 }
 
 model {
   
   // state model
-  sigma ~ normal(0.005, 0.005);
+  sigma ~ normal(0.002, 0.001);
   
   mu[1, ] ~ normal(mu_start, 0.0001); // start very very close to the first election result
   for (i in 2:sum(n_days))
@@ -56,28 +57,29 @@ model {
   // 2. Polls
   for(p in 1:5)
     d[p, ] ~ normal(0.0, 0.075); // ie a fairly loose prior for house effects
+    // s ~ normal(1, 0.5);
   
   for(j in 1:n_parties){
     
     
     for(t in 1:y1_n)
         y1_values[t, j] ~ normal(mu[y1_days[t], j] + d[1, j], 
-                              sqrt(mu[y1_days[t], j] * (1 - mu[y1_days[t], j]) / 800));
+                              sqrt(mu[y1_days[t], j] * (1 - mu[y1_days[t], j]) / 800 * 2));
                               
     for(t in 1:y2_n)
         y2_values[t, j] ~ normal(mu[y2_days[t], j] + d[2, j], 
-                              sqrt(mu[y2_days[t], j] * (1 - mu[y2_days[t], j]) / 800));
+                              sqrt(mu[y2_days[t], j] * (1 - mu[y2_days[t], j]) / 800 * 2));
                               
     for(t in 1:y3_n)
         y3_values[t, j] ~ normal(mu[y3_days[t], j] + d[3, j], 
-                              sqrt(mu[y3_days[t], j] * (1 - mu[y3_days[t], j]) / 800));
+                              sqrt(mu[y3_days[t], j] * (1 - mu[y3_days[t], j]) / 800 * 2));
                               
     for(t in 1:y4_n)
         y4_values[t, j] ~ normal(mu[y4_days[t], j] + d[4, j], 
-                              sqrt(mu[y4_days[t], j] * (1 - mu[y4_days[t], j]) / 800));
+                              sqrt(mu[y4_days[t], j] * (1 - mu[y4_days[t], j]) / 800 * 2));
                               
     for(t in 1:y5_n)
         y5_values[t, j] ~ normal(mu[y5_days[t], j] + d[5, j], 
-                              sqrt(mu[y5_days[t], j] * (1 - mu[y5_days[t], j]) / 800));
+                              sqrt(mu[y5_days[t], j] * (1 - mu[y5_days[t], j]) / 800 * 2));
   }
 }

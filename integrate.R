@@ -28,6 +28,14 @@ rstan_options(auto_write = TRUE)
 options(mc.cores = 7)
 
 
+ThisElection <- "2017-09-23"
+
+electionday <- data_frame(
+  MidDate = as.numeric(as.Date(ThisElection))
+)
+
+
+
 #=============GAM model=========================
 # compile Stan function used, if hasn't already been done
 # disc <- rnorm(10)
@@ -50,7 +58,7 @@ write.csv(seats, file = "D:/Peter/Documents/blog/ellisp.github.io/elections/simu
 
 #================state space model==================
 # caution - takes about 6 hours, has about 20,000 parameters to estimate
-system.time({source("method-statespace/ss-main.R")})
+system.time({source("method-statespace/ss-main.R")}) # 20,000 seconds 27/6/17
 
 
 #================combined================

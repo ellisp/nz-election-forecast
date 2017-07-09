@@ -79,6 +79,9 @@ s1 <- summary(m1, pars = "mu")$summary %>%
          day = rep(1:sum(days_between_elections), each = length(parties_ss)),
          day = as.Date(day, origin = "2011-11-25"))
 
+# summary(m1, pars = "s")$summary
+summary(m1, pars = "d")$summary[ ,"mean"]
+
 
 
 p1 <- s1 %>%
@@ -101,7 +104,10 @@ p1 <- s1 %>%
 
 svg("./output/state-space-ribbons.svg", 10, 6)  
 print(p1)
-grid.text(0.8, 0.2, label = "hello")
+grid.text(0.65, 0.2, label = "Vertical lines indicate elections.  Points show poll results.
+Estimates of latent voting intention take into account past under 
+and over-estimates of polling firms.",
+          gp = gpar(fontfamily = thefont))
 dev.off()
 
 

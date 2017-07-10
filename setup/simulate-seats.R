@@ -179,4 +179,6 @@ simulate_seats <- function(sims, prefix){
                   "Forecasts based on opinion poll trends, calibrated to previous election outcomes"))
   dev.off()
   
+  return(seats)
+  
 }  

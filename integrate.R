@@ -53,7 +53,7 @@ source("method-gam/fit-gam.R")
 source("method-gam/simulations.R")
 
 # next line is specific to my (PE) setup, saving a copy of the seat simulations for my webpage:
-write.csv(seats, file = "D:/Peter/Documents/blog/ellisp.github.io/elections/simulations.csv",
+write.csv(seats_gam, file = "D:/Peter/Documents/blog/ellisp.github.io/elections/simulations.csv",
           row.names = FALSE)
 
 #================state space model==================
@@ -71,12 +71,11 @@ simulate_seats(sims_combined, prefix = "combined")
 
 
 
-
-
-
-
-
 #=======for shiny app========
+# which simulated party vote to use for shiny app?
+sims <- sims_gam
+# sims <- sims_combined # ??
+
 # set which shiny app to deploy: nz-election-2017 for produ, nz-election-2017-test for testing
 app_name <- "nz-election-2017-test"
 # app_name <- "nz-election-2017"

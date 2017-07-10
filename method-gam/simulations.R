@@ -58,5 +58,5 @@ sims_gam <- inv.logit(MASS::mvrnorm(n = n,
   as_tibble()
 names(sims_gam) <- gsub("M.ori", "Maori", parties)
 
-simulate_seats(sims_gam, prefix = "gam")
+seats_gam <- simulate_seats(sims_gam, prefix = "gam")
 

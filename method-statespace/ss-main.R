@@ -92,6 +92,8 @@ system.time({
   m1 <- stan(file = "method-statespace/ss-vectorized.stan", data = d1, chains = 1)
 }) # c. 6 hours original; 3.5 hours when standard errors only calculated once in advance. 20 minutes when re-parameterised.
 
+source("method-statespace/ss-diagnostics.R")
+
 s1 <- summary(m1, pars = "mu")$summary %>%
   as_tibble() %>%
   mutate(Party = rep(parties_ss, sum(days_between_elections)),
@@ -155,7 +157,7 @@ data.frame(d = round(summary(m1, pars = "d")$summary[, "mean"] * 100, 2),
   ggplot(aes(y = party, colour = pollster, x = d)) +
   geom_point(size = 2) +
   labs(x = "Average house effect (positive numbers mean the pollster over-estimates vote for that party)",
-       y = "")
+       y = "", colour = "")
 )
 dev.off()
 

@@ -40,7 +40,8 @@ data {
   
 }
 parameters {
-  real epsilon[sum(n_days), n_parties];     // innovations in underlying state of vote intention
+  vector[n_parties] epsilon[sum(n_days)];     // innovations in underlying state of vote intention
+  corr_matrix[n_parties] omega;
   real<lower=0> sigma[n_parties];           // standard deviations for daily innovations for each party
   real d[5, n_parties];                     // house effects for 5 pollsters and n_parties parties
 }
@@ -50,25 +51,28 @@ transformed parameters {
   mu[1, ] = mu_start;
   for(i in 2:sum(n_days)){
     for(j in 1:n_parties){
-      mu[i, j] = mu[i-1, j] + epsilon[i, j] * sigma[j];
+      mu[i, j] = mu[i-1, j] + epsilon[i][j] * sigma[j];
     }
     
   }
 }
 
 model {
+  vector[n_parties] zeroes;
+  zeroes = rep_vector(0, n_parties);
   
-  // prior for standard deviation of innovations
+  // prior for scaling of innovations
   sigma ~ normal(0.002, 0.001);
   
-  // innovations in the state space 
-  // (can probably be improved by vectorising epsilon)
-  for(j in 1:n_parties){
-      epsilon[ , j] ~ normal(0, 1);  
-    }
+  // prior for correlation matrix of innovations, on standardised scale (so SD = 1)
+  omega ~ lkj_corr(1); // LKJ prior on the correlation matrix 
   
-    
-    
+  // innovations in the state space, on standardised scale
+  // Note - when this is done as iid normal rather than multi_normal it makes things
+  // dramatically faster (20 minutes versus 80 minutes), but at cost to modelling coherence.
+  // We need this multivariate approach to adequately capture the correlation
+  epsilon ~ multi_normal(zeroes, omega);  
+  
   // measurement model
   // 1. Election result for second election - treat as observation with a very big sample size
   mu_finish ~ normal(mu[n_days[1], ], sqrt(.3 * .7 / 10 ^ 5));

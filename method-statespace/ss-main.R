@@ -161,11 +161,13 @@ data.frame(d = round(summary(m1, pars = "d")$summary[, "mean"] * 100, 2),
 )
 dev.off()
 
-# extract the simulations for the final election day
+plot(density(rbeta(1000, 1,3) / 80))
+
+# extract the simulations for the final election day (and make up for the the three tiny parties)
 sims_ss <- data.frame(rstan::extract(m1, "mu")$mu[ , sum(days_between_elections), ]) %>%
-  mutate(Conservative = runif(n(), 0, 0.01),
-         `United Future` = runif(n(), 0, 0.01),
-         Mana = runif(n(), 0, 0.01))
+  mutate(Conservative = rbeta(n(), 1, 3) / 100,
+         `United Future` = rbeta(n(), 1, 3) / 100,
+         Mana = rbeta(n(), 1, 3) / 100)
 names(sims_ss)[1:length(parties_ss)] <- parties_ss
 sims_ss <- select(sims_ss, -Other)
 

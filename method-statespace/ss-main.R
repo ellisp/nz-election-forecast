@@ -37,7 +37,7 @@ polls2 <- polls %>%
 pollsters <- unique(polls2$Pollster)
 
 polls3 <- lapply(pollsters, function(x){
-  filter(polls2, Pollster == x)
+  dplyr::filter(polls2, Pollster == x)
 })
 
 parties_ss <- names(elections)
@@ -45,33 +45,52 @@ parties_ss <- names(elections)
 election_dates <-  as.Date(c("2011-11-26", "2014-09-20", "2017-09-23"))
 days_between_elections <- as.integer(diff(election_dates)) + 1
 
+
+all_ses <- polls2 %>%
+  select(Pollster, ACT:Other) %>%
+  gather(Party, p, -Pollster) %>%
+  group_by(Pollster, Party) %>%
+  summarise(p = mean(p),
+            se = sqrt(p * (1-p) / 800))
+ses3 <- lapply(pollsters, function(x){
+  dplyr::filter(all_ses, Pollster == x)
+})
+
 d1 <- list(mu_start = as.numeric(elections[1, ]), 
            mu_finish = as.numeric(elections[2, ]), 
            
            n_parties = length(parties_ss),
            n_days = days_between_elections, 
+           inflator = sqrt(2),
 
-                      y1_n = nrow(polls3[[1]]),
+           y1_n = nrow(polls3[[1]]),
            y1_values = polls3[[1]][ , 4:10],
            y1_days = as.numeric(polls3[[1]]$MidDateNumber),
+           y1_se = ses3[[1]]$se,
            
            y2_n = nrow(polls3[[2]]),
            y2_values = polls3[[2]][ , 4:10],
            y2_days = as.numeric(polls3[[2]]$MidDateNumber),
+           y2_se = ses3[[2]]$se,
            
            y3_n = nrow(polls3[[3]]),
            y3_values = polls3[[3]][ , 4:10],
            y3_days = as.numeric(polls3[[3]]$MidDateNumber),
+           y3_se = ses3[[3]]$se,
            
            y4_n = nrow(polls3[[4]]),
            y4_values = polls3[[4]][ , 4:10],
            y4_days = as.numeric(polls3[[4]]$MidDateNumber),
+           y4_se = ses3[[4]]$se,
            
            y5_n = nrow(polls3[[5]]),
            y5_values = polls3[[5]][ , 4:10],
-           y5_days = as.numeric(polls3[[5]]$MidDateNumber))
+           y5_days = as.numeric(polls3[[5]]$MidDateNumber),
+           y5_se = ses3[[5]]$se)
 
-m1 <- stan(file = "method-statespace/ss-simple.stan", data = d1, chains = 4)
+system.time({
+  m1 <- stan(file = "method-statespace/ss-vectorized.stan", data = d1, chains = 1)
+}) # c. 6 hours original; 3.5 hours when standard errors only calculated once in advance. 20 minutes when re-parameterised.
 
 s1 <- summary(m1, pars = "mu")$summary %>%
   as_tibble() %>%
@@ -81,6 +100,7 @@ s1 <- summary(m1, pars = "mu")$summary %>%
 
 # summary(m1, pars = "s")$summary
 summary(m1, pars = "d")$summary[ ,"mean"]
+round(summary(m1, pars = "sigma")$summary[ ,"mean"], 6)
 
 
 
@@ -147,4 +167,4 @@ sims_ss <- data.frame(rstan::extract(m1, "mu")$mu[ , sum(days_between_elections)
 names(sims_ss)[1:length(parties_ss)] <- parties_ss
 sims_ss <- select(sims_ss, -Other)
 
-simulate_seats(sims_ss, prefix = "state-space")
+seats_ss <- simulate_seats(sims_ss, prefix = "state-space")

@@ -57,8 +57,9 @@ write.csv(seats_gam, file = "D:/Peter/Documents/blog/ellisp.github.io/elections/
           row.names = FALSE)
 
 #================state space model==================
-# caution - takes about 6 hours, has about 20,000 parameters to estimate
-system.time({source("method-statespace/ss-main.R")}) # 
+# caution - takes more than an hour, has about 20,000 parameters to estimate
+# still needs some more refactoring!:
+system.time({source("method-statespace/ss-main.R")}) 
 
 
 #================combined================

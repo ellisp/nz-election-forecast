@@ -58,13 +58,13 @@ write.csv(seats_gam, file = "D:/Peter/Documents/blog/ellisp.github.io/elections/
 
 #================state space model==================
 # caution - takes about 6 hours, has about 20,000 parameters to estimate
-system.time({source("method-statespace/ss-main.R")}) # 20,000 seconds 27/6/17
+system.time({source("method-statespace/ss-main.R")}) # 
 
 
 #================combined================
-# this takes 1000 simulations from the state space model, and
+# this takes simulations from the state space model, and
 # the same number from the GAM model, and combines the two
-equal_rows <- min(nrow(sims_gam), nrow(sims_ss))
+equal_rows <- min(min(nrow(sims_gam), nrow(sims_ss)), 2000)
 
 sims_combined <- rbind(sims_gam[1:equal_rows, ], sims_ss[1:equal_rows, ])
 simulate_seats(sims_combined, prefix = "combined")
@@ -73,8 +73,8 @@ simulate_seats(sims_combined, prefix = "combined")
 
 #=======for shiny app========
 # which simulated party vote to use for shiny app?
-sims <- sims_gam
-# sims <- sims_combined # ??
+sims <- sims_combined %>%
+  mutate(model = rep(c("Model A", "Model B"), each = equal_rows))
 
 # set which shiny app to deploy: nz-election-2017 for produ, nz-election-2017-test for testing
 app_name <- "nz-election-2017-test"

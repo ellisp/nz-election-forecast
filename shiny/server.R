@@ -9,8 +9,7 @@ load("sims.rda") # simulated party vote
 load("parties.rda")
 load("parties_ordered.rda")
 
-n <- 2000 
-sims <- sims[1:n, ]
+n <- nrow(sims) / 2
 
 # a filler data frame of the three parties that don't get any simulated electorate seats.
 # Note that NZ First isn't really a certainty to get their seat, but it doesn't matter as they are 
@@ -28,6 +27,18 @@ shinyServer(function(input, output) {
     return(tmp)
   })
   
+  # which data to use
+  sims_use <- reactive({
+    if(input$model == "Combined"){
+      tmp <- sample_n(sims, n)
+    } else {
+      tmp <- dplyr::filter(sims, model == input$model)
+    }
+    tmp <- dplyr::select(tmp, -model)
+    return(tmp)
+
+  })
+  
   #---------------simulate seats----------------
   # Turn the Maori seat chances chosen by user into a data frame:
   maori_probs <- reactive({
@@ -39,8 +50,8 @@ shinyServer(function(input, output) {
 
   # Allocate individual electorate seats for each row of the simulation:  
   electorate_sims <- reactive({data_frame(
-    orahiu = sample(c("United Future", "Labour"), prob = c(input$ohariu, 1-input$ohariu), size = n, replace = TRUE),
-    epsom = sample(c("ACT", "National"), prob = c(input$epsom, 1-input$epsom), size = n, replace = TRUE),
+    orahiu = sample(c("United Future", "Labour"), prob = c(input$ohariu, 1 - input$ohariu), size = n, replace = TRUE),
+    epsom = sample(c("ACT", "National"), prob = c(input$epsom, 1 - input$epsom), size = n, replace = TRUE),
     m1 = sample(c("Labour", "Maori"), prob = maori_probs()[1, 1:2], size = n, replace = TRUE),
     m2 = sample(c("Labour", "Maori"), prob = maori_probs()[2, 1:2], size = n, replace = TRUE),
     m3 = sample(c("Labour", "Maori"), prob = maori_probs()[3, 1:2], size = n, replace = TRUE),
@@ -60,7 +71,7 @@ shinyServer(function(input, output) {
   
   # Allocate seats on basis of party vote and electorates
   seats <- reactive({t(sapply(1:n, function(i){
-    allocate_seats(votes = as.numeric(sims[i, ]), 
+    allocate_seats(votes = as.numeric(sims_use()[i, ]), 
                    electorate = as.numeric(electorate_sims()[i, -1]),
                    parties = gsub("M.ori", "Maori", parties))$seats_v
   })) %>%

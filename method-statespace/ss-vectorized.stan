@@ -48,13 +48,14 @@ parameters {
 
 transformed parameters {
   real mu[sum(n_days), n_parties];     // underlying state of vote intention, as a proportion (not percentage)
+  
   mu[1, ] = mu_start;
   for(i in 2:sum(n_days)){
     for(j in 1:n_parties){
       mu[i, j] = mu[i-1, j] + epsilon[i][j] * sigma[j];
     }
-    
   }
+  
 }
 
 model {
@@ -66,6 +67,9 @@ model {
   
   // prior for correlation matrix of innovations, on standardised scale (so SD = 1)
   omega ~ lkj_corr(1); // LKJ prior on the correlation matrix 
+  
+  // prior for incumbency, from separate "political science" style model.  Doesn't work...
+  // mu[5, sum(n_days)] ~ normal(0.46, 0.06);
   
   // innovations in the state space, on standardised scale
   // Note - when this is done as iid normal rather than multi_normal it makes things

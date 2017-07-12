@@ -24,7 +24,11 @@ body {font-family: 'Lato', 'Lucida Grande', Verdana, Lucida, Helvetica, Arial, C
   fluidRow(
     id = "parameters",
     column(3,
-       checkboxGroupInput("coal_members",
+       selectInput("model",
+                   "Forecasting model",
+                   choices = c("Model A", "Model B", "Combined"),
+                   selected = "Model A"),
+           checkboxGroupInput("coal_members",
                    "Select coalition members",
                    choices = parties,
                    selected = c("ACT", "National", "United Future", "Māori")
@@ -74,7 +78,15 @@ challenge of forecasting in time, and randomness on election day.
 See the <a href='http://ellisp.github.io/elections/elections.html'>
 full description of the method</a> or the <a href = 'https://github.com/ellisp/nz-election-forecast'>
 source code</a> for more details.  <a href='http://ellisp.github.io/elections/elections.html'>
-Comments are welcome.</a></p>")           
+Comments are welcome.</a></p>
+     
+<p>Read this <a href='http://ellisp.github.io/elections/state-space.html'>description of the difference between 
+Model A (a generalized additive model) and Model B (a state-space model)</a>.  
+Most importantly, Model B as currently specified assumes on average
+no change in underlying intended party vote between now and the election; the Model A assumes that recent
+growth or decline in a party's intended vote will continue in a structural way over the remaining days.  The author
+prefers Model A.  But predicting is hard, particularly about the future.</p>
+     ")           
            )
     )
     

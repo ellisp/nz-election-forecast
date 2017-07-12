@@ -88,9 +88,14 @@ d1 <- list(mu_start = as.numeric(elections[1, ]),
            y5_days = as.numeric(polls3[[5]]$MidDateNumber),
            y5_se = ses3[[5]]$se)
 
+# good discussion here on iterations and chains https://groups.google.com/forum/#!topic/stan-users/5WG51xKNSbA
+# The below is used on my 8 core machine
 system.time({
-  m1 <- stan(file = "method-statespace/ss-vectorized.stan", data = d1, chains = 1)
-}) # c. 6 hours original; 3.5 hours when standard errors only calculated once in advance. 20 minutes when re-parameterised.
+  m1 <- stan(file = "method-statespace/ss-vectorized.stan", data = d1, 
+             chains = 4, iter = 1000)
+}) 
+# c. 6 hours original; 3.5 hours when standard errors only calculated once in advance. 20 minutes when re-parameterised. 
+# Back up to 80 minutes when made the innovations covary with eachother rather than independent
 
 source("method-statespace/ss-diagnostics.R")
 
@@ -160,8 +165,6 @@ data.frame(d = round(summary(m1, pars = "d")$summary[, "mean"] * 100, 2),
        y = "", colour = "")
 )
 dev.off()
-
-plot(density(rbeta(1000, 1,3) / 80))
 
 # extract the simulations for the final election day (and make up for the the three tiny parties)
 sims_ss <- data.frame(rstan::extract(m1, "mu")$mu[ , sum(days_between_elections), ]) %>%

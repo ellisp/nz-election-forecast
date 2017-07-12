@@ -8,3 +8,6 @@ print(ggpairs(as.data.frame(extracts$epsilon[ , 2130, ]), title = "Election day 
 print(ggpairs(as.data.frame(extracts$mu[ , 1000, ]), title = "Day 1000 mu"))
 print(ggpairs(as.data.frame(extracts$epsilon[ , 1000, ]), title = "Day 1000 epsilon"))
 dev.off()
+
+
+summary(m1, par = "omega")

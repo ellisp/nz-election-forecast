@@ -4,6 +4,12 @@
 // 2000+ days with n_parties (maybe 7 or so) state to estimate for each day,
 // it will have > 10,000 parameters to estimate and takes a long time to run.
 
+// an alternative approach to the below would be to specify mu to be an array of simplex vectors,
+// constrained to add up to 1.  The rationale for *not* doing this is that it isn't really clear
+// what the proportions in mu really are of - because of population change, and turnout to vote.
+// So it's not certain that forcing them to add up to exactly 1 will help much, and it will certainly
+// add to complexity.
+
 data {
   int n_days[2];                   // number of days between first, second and third elections
   int n_parties;                            // number of parties
@@ -69,7 +75,8 @@ model {
   omega ~ lkj_corr(1); // LKJ prior on the correlation matrix 
   
   // prior for incumbency, from separate "political science" style model.  Doesn't work...
-  // mu[5, sum(n_days)] ~ normal(0.46, 0.06);
+  // Fixing this could be key to making this a decent combination of political science and polls.
+  // mu[5, sum(n_days)] ~ normal(0.45, 0.06);
   
   // innovations in the state space, on standardised scale
   // Note - when this is done as iid normal rather than multi_normal it makes things

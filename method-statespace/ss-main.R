@@ -61,6 +61,7 @@ d1 <- list(mu_start = as.numeric(elections[1, ]),
            
            n_parties = length(parties_ss),
            n_days = days_between_elections, 
+           # multiply the variance of all polls by 2.  See my blog post of 9 July 2017.
            inflator = sqrt(2),
 
            y1_n = nrow(polls3[[1]]),

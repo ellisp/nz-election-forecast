@@ -17,6 +17,7 @@ library(directlabels)
 library(viridis)
 library(rsconnect)
 library(rstan)
+library(testthat)
 
 thefont <- "Calibri"
 
@@ -59,8 +60,8 @@ write.csv(seats_gam, file = "D:/Peter/Documents/blog/ellisp.github.io/elections/
 #================state space model==================
 # caution - takes more than an hour, has about 20,000 parameters to estimate
 # still needs some more refactoring!:
-system.time({source("method-statespace/ss-main.R")}) 
-
+system.time({source("method-statespace/ss-main.R")})  # about 80 minutes on 12 July 2017
+# (fastest version at 20 minutes required assuming iid innovations in state space)
 
 #================combined================
 # this takes simulations from the state space model, and
@@ -80,11 +81,11 @@ sims <- sims_combined %>%
 # set which shiny app to deploy: nz-election-2017 for produ, nz-election-2017-test for testing
 app_name <- "nz-election-2017-test"
 # app_name <- "nz-election-2017"
-source("method-gam/shiny-prep.R")
+source("setup/shiny-prep.R")
 
 # could turn the below into functions... or better, abstract the whole modelling process
 # so it works for an arbitrary election, on an arbitrary reference data
 # source("method-gam/retro-2014/retro-integrate.R")
 # source("method-gam/retro-2014-1week/retro-integrate.R")
 
-source("method-gam/copy-files.R")
+source("setup/copy-files.R")

@@ -1,6 +1,6 @@
 data {
   int N;                        // sample size - number of elections
-  real disc[N];                // historical errors / discrepencies
+  vector[N] disc;                // historical errors / discrepencies
 }
 parameters {
   real house_effect;
@@ -9,6 +9,5 @@ parameters {
 model {
   sigma ~ cauchy(0, 5);
   house_effect ~ normal(0, 0.15);
-  for (i in 1:N) 
-      disc[i] ~ normal(house_effect, sigma);
+  disc ~ normal(house_effect, sigma);
 }

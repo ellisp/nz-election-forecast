@@ -1,6 +1,6 @@
 # Install latest version of nzelect with most recent polling data
 # (more up to date than the CRAN version)
-# devtools::install_github("ellisp/nzelect/pkg1")
+devtools::install_github("ellisp/nzelect/pkg1")
 library(Cairo)
 library(tidyverse)
 library(magrittr)
@@ -38,7 +38,7 @@ electionday <- data_frame(
 
 
 #=============GAM model=========================
-# compile Stan function used, if hasn't already been done
+# compile Stan function used for regularized house effects, if hasn't already been done
 # disc <- rnorm(10)
 # x <- list(disc = disc, N = length(disc))
 # fit <- stan(file = 'method-gam/estimate-house-effects.stan', data = x, control = list(adapt_delta = 0.995))
@@ -46,7 +46,7 @@ electionday <- data_frame(
 
 # house effects, and variance of election results compared to predictions,
 # using all available data
-source("method-gam/estimate-house-effects.R")
+source("method-gam/estimate-house-effects.R") # note - calls Stan separately for each party - pollster combo, could be refactored!
 source("method-gam/estimate-election-variance.R")
 
 # Fit model and simulations for this current election year

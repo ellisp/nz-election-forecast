@@ -8,7 +8,7 @@ files <- c(paste0(rep(c("gam-", "state-space-", "combined-"), each = 6),
                      "results-pairs.png",
                      "vote-predictions-density.svg",
                      "final-chances-histogram.svg")),
-           "gam-vote-predictions.svg",
+           "gam-vote-predictions.svg", "gam-vote-predictions-png",
            "state-space-ribbons.svg")
 
 exists <- file.copy(from = paste0("output/", files), 

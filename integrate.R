@@ -71,9 +71,10 @@ equal_rows <- min(min(nrow(sims_gam), nrow(sims_ss)), 2000)
 sims_combined <- rbind(sims_gam[1:equal_rows, ], sims_ss[1:equal_rows, ])
 simulate_seats(sims_combined, prefix = "combined")
 
+# manual edit needed at this point before re-creating the tracking plot
+source("tracking-plot.R")
 
-
-#=======for shiny app========
+#=======for shiny app and final distribution========
 # which simulated party vote to use for shiny app?
 sims <- sims_combined %>%
   mutate(model = rep(c("Model A", "Model B"), each = equal_rows))
@@ -83,9 +84,15 @@ app_name <- "nz-election-2017-test"
 # app_name <- "nz-election-2017"
 source("setup/shiny-prep.R")
 
+source("setup/copy-files.R")
+
+
+
+
+
 # could turn the below into functions... or better, abstract the whole modelling process
 # so it works for an arbitrary election, on an arbitrary reference data
 # source("method-gam/retro-2014/retro-integrate.R")
 # source("method-gam/retro-2014-1week/retro-integrate.R")
 
-source("setup/copy-files.R")
+

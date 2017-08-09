@@ -79,12 +79,14 @@ source("tracking-plot.R")
 sims <- sims_combined %>%
   mutate(model = rep(c("Model A", "Model B"), each = equal_rows))
 
+source("setup/copy-files.R")
+
 # set which shiny app to deploy: nz-election-2017 for produ, nz-election-2017-test for testing
 app_name <- "nz-election-2017-test"
 # app_name <- "nz-election-2017"
 source("setup/shiny-prep.R")
 
-source("setup/copy-files.R")
+
 
 
 

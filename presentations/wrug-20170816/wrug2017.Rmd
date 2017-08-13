@@ -1,0 +1,38 @@
+---
+title: "Forecasting New Zealand elections with R and Stan"
+author: "Peter Ellis"
+date: "16 August 2017"
+output:
+  revealjs::revealjs_presentation:
+    theme: solarized
+    includes:
+      in_header: header.css
+---
+
+```{r setup, include=FALSE}
+# needs to be run from the ./Session1/ directory
+stripcolour <- "grey93"
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+load("../../shiny/sims.rda")
+```
+
+## Today's content
+
+- Data acquisition and management via its own R package
+- Statistical modellying
+- Dissemination with Shiny, Jekyll and Markdown
+
+# Data management
+
+## Comprehend this: {data-transition="fade-out"}
+```{r echo = TRUE}
+data(anscombe)
+anscombe[ , c(1,5,2,6,3,7,4,8)]
+```
+
+
+# Statistical modelling
+## something else
+
+# Dissemination with Shiny, Jekyll and Markdown
+## something else

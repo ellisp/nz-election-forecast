@@ -1,4 +1,6 @@
 # draw chart of predictions to date
+# added August 2017
+# TODO - make tracking.csv automatically update (currently done by hand)
 
 tracking <- read.csv("data/tracking.csv", check.names = FALSE, stringsAsFactors = FALSE) %>%
   mutate(Date = as.Date(Date)) %>%

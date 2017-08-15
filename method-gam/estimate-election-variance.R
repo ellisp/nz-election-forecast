@@ -56,13 +56,13 @@ comparisons <- election_predictions %>%
 
 # variance is a function of Result, roughly linear from log(var) ~ logit(result)
 svg("./output/0085-variance.svg", 8, 7)
-ggplot(comparisons, aes(x = Result, y = SquaredError, label = paste(Party, substring(MidDate,1, 4)))) +
+print(ggplot(comparisons, aes(x = Result, y = SquaredError, label = paste(Party, substring(MidDate,1, 4)))) +
   geom_smooth(method = "lm") +
   geom_text(aes(colour = as.ordered(MidDate))) +
   labs(x = "Result (logit scale)")+
   scale_y_log10("Squared Error (on logit scale) from actual election result", label = comma) +
   scale_color_viridis(discrete = TRUE, begin = 0.2, end = 0.8, option = "B") +
-  ggtitle("Variance compared to election result")
+  ggtitle("Variance compared to election result"))
 dev.off()
       
 mod_var <- lm(log(SquaredError) ~ Result, data = comparisons)

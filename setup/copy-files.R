@@ -1,5 +1,5 @@
 # this is only for on Peter Ellis' own setup.  Copies output files over to his blog repository.
-# Depends on simulations.R
+# Depends on both the GAM and state space models having been run
 
 
 files <- c(paste0(rep(c("gam-", "state-space-", "combined-"), each = 6), 

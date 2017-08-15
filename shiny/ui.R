@@ -1,3 +1,5 @@
+# user interface for elections shiny app
+
 library(shiny)
 library(shinyjs)
 library(ggvis)
@@ -7,7 +9,6 @@ load("parties.rda")
 minsl <- 0.05
 maxsl <- 0.95
 
-# Define UI for application that draws a histogram
 shinyUI(fluidPage(
   useShinyjs(),
   tags$style(HTML("
@@ -17,10 +18,8 @@ body {font-family: 'Lato', 'Lucida Grande', Verdana, Lucida, Helvetica, Arial, C
 ")),
   
   
-  # Application title
   titlePanel("Forecasts for New Zealand General Election 2017"),
   
-  # Sidebar with a slider input for number of bins 
   fluidRow(
     id = "parameters",
     column(3,

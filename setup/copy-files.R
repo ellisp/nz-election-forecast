@@ -2,7 +2,10 @@
 # Depends on both the GAM and state space models having been run
 
 
+# comment out one of the next two lines according to whether transferring over all
+# the output from all three models, or just from the GAM Model A
 files <- c(paste0(rep(c("gam-", "state-space-", "combined-"), each = 6), 
+# files <- c(paste0(rep(c("gam-"), each = 6), 
                    c("final-chances-bar.svg",
                      "results-density.svg",
                      "results-pairs.png",
@@ -23,6 +26,7 @@ setwd(projdir)
 # sleep for 20 seconds to make sure there is time for ImageMagick to finish its stuff
 Sys.sleep(20)
 
+unlink("D:/Peter/Documents/blog/ellisp.github.io/img/gam-final-chances-bar.svg")
 exists <- file.copy(from = paste0("output/", files), 
           to = paste0("D:/Peter/Documents/blog/ellisp.github.io/img/", files),
           overwrite = TRUE)

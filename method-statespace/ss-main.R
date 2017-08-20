@@ -93,7 +93,7 @@ d1 <- list(mu_start = as.numeric(elections[1, ]),
 # The below is used on my 8 core machine
 system.time({
   m1 <- stan(file = "method-statespace/ss-vectorized.stan", data = d1, 
-             chains = 4, iter = 1200)
+             chains = 4, iter = 1500, control = list(max_treedepth = 10))
 }) 
 # c. 6 hours original; 3.5 hours when standard errors only calculated once in advance. 20 minutes when re-parameterised. 
 # Back up to 80 minutes when made the innovations covary with eachother rather than independent

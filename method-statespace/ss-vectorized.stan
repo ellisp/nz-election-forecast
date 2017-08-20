@@ -91,7 +91,8 @@ model {
   // 2. Polls
   
   for(p in 1:5)
-    d[p, ] ~ normal(0.0, 0.075); // ie a fairly loose prior for the five house effects
+    d[p, ] ~ normal(0.0, 0.025); // ie a fairly loose prior for the five house effects.  
+    // Brought down from 0.075 to 0.025 on 18 August 2017 because it was converging to non-sensible results.
   
   // This can probably be improved by vectorising too  
   for(j in 1:n_parties){

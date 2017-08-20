@@ -7,7 +7,8 @@ tracking <- read.csv("data/tracking.csv", check.names = FALSE, stringsAsFactors 
   filter(!is.na(Date)) %>%
   gather(model, value, -Date) %>%
   mutate(model = factor(model, levels = c("Model B", "Combined", "Model A")),
-         value = value / 100)
+         value = value / 100) %>%
+  filter(!is.na(value))
 
 model_palette <- brewer.pal(7, "Blues")
 names(model_palette)[c(3, 5, 7)] <- levels(tracking$model)

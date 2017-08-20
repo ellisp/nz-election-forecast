@@ -48,7 +48,7 @@ electorate seats, and hence of total seats allocated.</p>"),
        hr(),
 h4("Important electorates"),
        sliderInput("epsom", "Epsom - probability of ACT win", min = minsl, max = maxsl, value = 0.8),
-       sliderInput("ohariu", "Ohariu - probability of United Future win", min = minsl, max = maxsl, value = 0.6),
+       sliderInput("ohariu", "Ohariu - probability of United Future win", min = minsl, max = maxsl, value = 0.3),
 p("Northland electorate, while of interest, is not included here as NZ First are believed likely to reach the 
 5% threshold even if they do not retain the electorate.")
        ),

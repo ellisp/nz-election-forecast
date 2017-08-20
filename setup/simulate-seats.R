@@ -66,7 +66,7 @@ simulate_seats <- function(sims, prefix){
   # impact on seat allocation as they always exceed the 5% party vote threshhold; they only
   # need to be in the simulation at all for the off chance they take Epsom off ACT.
   electorate_sims <- data_frame(
-    orahiu = sample(c("United Future", "Labour"), prob = c(0.6, 0.4), size = n, replace = TRUE),
+    orahiu = sample(c("United Future", "Labour"), prob = c(0.3, 0.7), size = n, replace = TRUE),
     epsom = sample(c("ACT", "National", "Labour"), prob = c(0.8, 0.1, 0.1), size = n, replace = TRUE),
     m1 = sample(c("Labour", "Mana"), prob = m_votes_2014[1, 3:4], size = n, replace = TRUE),
     m2 = sample(c("Labour", "Maori"), prob = m_votes_2014[2, 3:4], size = n, replace = TRUE),

@@ -67,7 +67,7 @@ system.time({source("method-statespace/ss-main.R")})  # about 80 minutes on 12 J
 #================combined================
 # this takes simulations from the state space model, and
 # the same number from the GAM model, and combines the two
-equal_rows <- min(min(nrow(sims_gam), nrow(sims_ss)), 2000)
+equal_rows <- min(min(nrow(sims_gam), nrow(sims_ss)), 3000)
 
 sims_combined <- rbind(sims_gam[1:equal_rows, ], sims_ss[1:equal_rows, ])
 simulate_seats(sims_combined, prefix = "combined")

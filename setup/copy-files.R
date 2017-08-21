@@ -23,10 +23,11 @@ for(i in files[grepl("svg$", files)]){
 }
 setwd(projdir)
 
-# sleep for 20 seconds to make sure there is time for ImageMagick to finish its stuff
-Sys.sleep(20)
-
+# sleep for 10 seconds to make sure there is time for ImageMagick to finish its stuff
 unlink("D:/Peter/Documents/blog/ellisp.github.io/img/gam-final-chances-bar.svg")
+Sys.sleep(10)
+
+
 exists <- file.copy(from = paste0("output/", files), 
           to = paste0("D:/Peter/Documents/blog/ellisp.github.io/img/", files),
           overwrite = TRUE)

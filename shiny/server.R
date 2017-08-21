@@ -15,9 +15,9 @@ n <- nrow(sims) / 2
 # Note that NZ First isn't really a certainty to get their seat, but it doesn't matter as they are 
 # almost certainly above the 5% threshold anyway, so we don't bother to simulate Northland
 filler <- data.frame(
-  party = c("Conservative", "Green", "NZ First"),
-  seats = c(0, 0, 1),
-  sim = rep(1:n, each = 3)
+  party = c("Conservative", "Green", "NZ First", "United Future"),
+  seats = c(0, 0, 1,0),
+  sim = rep(1:n, each = 4)
 )
 
 shinyServer(function(input, output) {
@@ -50,7 +50,6 @@ shinyServer(function(input, output) {
 
   # Allocate individual electorate seats for each row of the simulation:  
   electorate_sims <- reactive({data_frame(
-    orahiu = sample(c("United Future", "Labour"), prob = c(input$ohariu, 1 - input$ohariu), size = n, replace = TRUE),
     epsom = sample(c("ACT", "National"), prob = c(input$epsom, 1 - input$epsom), size = n, replace = TRUE),
     m1 = sample(c("Labour", "Maori"), prob = maori_probs()[1, 1:2], size = n, replace = TRUE),
     m2 = sample(c("Labour", "Maori"), prob = maori_probs()[2, 1:2], size = n, replace = TRUE),

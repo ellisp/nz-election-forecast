@@ -37,5 +37,6 @@ vignettes/*.pdf
 output/*
 
 README.html
-
+presentations/newshub-20170829/*.html
+presentations/newshub-20170829/*.svg
 *.dcf

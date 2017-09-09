@@ -1,6 +1,6 @@
 # draw chart of predictions to date
 # added August 2017
-# TODO - make tracking.csv automatically update (currently done by hand)
+
 
 tracking <- read.csv("data/tracking.csv", check.names = FALSE, stringsAsFactors = FALSE) %>%
   mutate(Date = as.Date(Date)) %>%
@@ -13,8 +13,10 @@ tracking <- read.csv("data/tracking.csv", check.names = FALSE, stringsAsFactors 
 model_palette <- brewer.pal(7, "Blues")
 names(model_palette)[c(3, 5, 7)] <- levels(tracking$model)
 
+favourite <- "Combined"
+
 latest <- tracking %>%
-  filter(Date == max(Date) & model == "Model A")
+  filter(Date == max(Date) & model == favourite)
 
 
 svg("output/election-forecast-tracking.svg", 7, 4)
@@ -30,12 +32,12 @@ ggplot(tracking, aes(x = Date, y = value, colour = model)) +
   ggtitle("2017 election forecasts changing over time",
           "Forecasts from two models and a combination of them") +
   annotate("text", x = as.Date("2017-06-01"), y = 0.5, 
-           label = paste0(latest$value * 100, "% chance for\nNational or coalition"),
-           colour = model_palette["Model A"],
+           label = paste0(latest$value * 100, "% chance for National\nor current coalition"),
+           colour = model_palette[favourite],
            size = 6) +
-  annotate("text", x = as.Date("2017-06-01"), y = 0.43,
+  annotate("text", x = as.Date("2017-06-01"), y = 0.41,
            label = paste("as at", Sys.Date()),
-           colour = model_palette["Model A"],
+           colour = model_palette[favourite],
            size = 4)
 )
 dev.off()

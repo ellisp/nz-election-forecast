@@ -17,7 +17,8 @@ data {
   real mu_finish[n_parties];                // value at second election
   real inflator;                      // amount by which to multiply the standard error of polls
   
-  // note - 5 pollsters is hard coded in to avoid having to use some kind of ragged array:
+  // note - pollsters are individually hard coded in to avoid having to use some kind of ragged array:
+  int n_pollsters;
   
   int y1_n;                              // number of polls conducted by pollster 1
   real y1_values[y1_n, n_parties];       // actual values in polls for pollster 1
@@ -44,12 +45,18 @@ data {
   int y5_days[y5_n];                     
   real y5_se[n_parties];
   
+  int y6_n;
+  real y6_values[y6_n, n_parties];       
+  int y6_days[y6_n];                     
+  real y6_se[n_parties];
+  
+  
 }
 parameters {
   vector[n_parties] epsilon[sum(n_days)];     // innovations in underlying state of vote intention
   corr_matrix[n_parties] omega;
   real<lower=0> sigma[n_parties];           // standard deviations for daily innovations for each party
-  real d[5, n_parties];                     // house effects for 5 pollsters and n_parties parties
+  real d[n_pollsters, n_parties];                     // house effects for n_pollsters and n_parties combinations
 }
 
 transformed parameters {
@@ -90,8 +97,8 @@ model {
   
   // 2. Polls
   
-  for(p in 1:5)
-    d[p, ] ~ normal(0.0, 0.025); // ie a fairly loose prior for the five house effects.  
+  for(p in 1:n_pollsters)
+    d[p, ] ~ normal(0.0, 0.025); // ie a fairly loose prior for the house effects for each pollster.  
     // Brought down from 0.075 to 0.025 on 18 August 2017 because it was converging to non-sensible results.
   
   // This can probably be improved by vectorising too  
@@ -111,5 +118,9 @@ model {
                               
     for(t in 1:y5_n)
         y5_values[t, j] ~ normal(mu[y5_days[t], j] + d[5, j], y5_se[j] * inflator);
+        
+    for(t in 1:y6_n)
+        y6_values[t, j] ~ normal(mu[y6_days[t], j] + d[6, j], y6_se[j] * inflator);
+        
   }
 }

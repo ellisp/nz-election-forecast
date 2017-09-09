@@ -26,7 +26,7 @@ body {font-family: 'Lato', 'Lucida Grande', Verdana, Lucida, Helvetica, Arial, C
        selectInput("model",
                    "Forecasting model",
                    choices = c("Model A", "Model B", "Combined"),
-                   selected = "Model A"),
+                   selected = "Combined"),
            checkboxGroupInput("coal_members",
                    "Select coalition members",
                    choices = parties,
@@ -83,8 +83,9 @@ Comments are welcome.</a></p>
 Model A (a generalized additive model) and Model B (a state-space model)</a>.  
 Most importantly, Model B as currently specified assumes on average
 no change in underlying intended party vote between now and the election; the Model A assumes that recent
-growth or decline in a party's intended vote will continue in a structural way over the remaining days.  The author
-prefers Model A.  But predicting is hard, particularly about the future.</p>
+growth or decline in a party's intended vote will continue in a structural way over the remaining days, 
+and is also slower to respond to rapid changes in apparent sentiment.  The author
+prefers the combination of the two.  But predicting is hard, particularly about the future.</p>
      ")           
            )
     )

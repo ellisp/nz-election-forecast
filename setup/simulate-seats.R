@@ -101,7 +101,7 @@ simulate_seats <- function(sims, prefix){
   seats <- seats %>%
     mutate(NatCoal = ACT + Conservative + National + `United Future` + Maori,
            LabGreen = Labour + Green,
-           LabGreenMana = Labour + Green + Mana,
+           LabGreenMaori = Labour + Green + Maori,
            LabGreenNZFirst = Labour + Green + NZ_First,
            NatCoalNZFirst = NatCoal + NZ_First)
   seats$Total <- apply(seats[ , 1:9], 1, sum)
@@ -153,9 +153,9 @@ simulate_seats <- function(sims, prefix){
           mutate(outcome = factor(outcome, levels = names(chances)[c(1,2,5,4,3)])) %>%
           ggplot(aes(x = outcome, weight = prob, fill = outcome)) +
           geom_bar() +
-          geom_text(aes(label = paste0(round(prob * 100, 1), "%"), y = prob +.039), colour = "darkred") +
+          geom_text(aes(label = paste0(round(prob * 100, 1), "%"), y = prob +.043), colour = "darkred") +
           coord_flip() +
-          scale_y_continuous("Chance of happening", label = percent, limits = c(0, 1)) +
+          scale_y_continuous("Chance of happening", label = percent, limits = c(0, 1.05)) +
           theme(legend.position = "none") +
           scale_fill_viridis(discrete = TRUE, option = "C", begin = 0.1, end = 0.9) +
           labs(x = "", caption = "Source: https://ellisp.github.io") +

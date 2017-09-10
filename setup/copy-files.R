@@ -5,14 +5,14 @@
 # comment out one of the next two lines according to whether transferring over all
 # the output from all three models, or just from the GAM Model A
 files <- c(paste0(rep(c("gam-", "state-space-", "combined-"), each = 6), 
-# files <- c(paste0(rep(c("gam-"), each = 6), 
                    c("final-chances-bar.svg",
                      "results-density.svg",
                      "results-pairs.png",
                      "vote-predictions-density.svg",
                      "final-chances-histogram.svg")),
            "gam-vote-predictions.svg", "gam-vote-predictions.png",
-           "state-space-ribbons.svg", "election-forecast-tracking.svg")
+           "state-space-ribbons.svg", "election-forecast-tracking.svg",
+           "state-space-house-effects.svg")
 
 projdir <- setwd("output/")
 for(i in files[grepl("svg$", files)]){

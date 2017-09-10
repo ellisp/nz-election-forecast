@@ -108,7 +108,7 @@ d1 <- list(mu_start = as.numeric(elections[1, ]),
            # y7_days = as.numeric(polls3[[7]]$MidDateNumber),
            # y7_se = ses3[[7]]$se,
            
-           n_pollsters = 7)
+           n_pollsters = 6)
 
 # The Listener-Bauer sample sizes are 1816, 1175 and 1528, which are bigger than the others,
 # so we manually make its standard errors a little smaller.  They are first in the list of

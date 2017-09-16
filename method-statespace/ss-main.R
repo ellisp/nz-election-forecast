@@ -32,6 +32,7 @@ polls2 <- polls %>%
   filter(ElectionYear %in% c(2014, 2017)) %>%
   # SSI only have a single poll, which stops the model converging, so we leave them out for now:
   filter(Pollster != "SSI") %>%
+  filter(Pollster != "Horizon Research") %>%
   spread(Party, VotingIntention, fill = 0) %>%
   ungroup() %>%
   mutate(MidDateNumber = as.numeric(MidDate - as.Date("2011-11-25"))) # election was 26 November 2011

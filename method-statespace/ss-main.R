@@ -97,6 +97,8 @@ d1 <- list(mu_start = as.numeric(elections[1, ]),
            y5_values = polls3[[5]][ , 4:10],
            y5_days = as.numeric(polls3[[5]]$MidDateNumber),
            y5_se = ses3[[5]]$se,
+           # next row is a dummy variable specially for Reid Research's change in methodology:
+           reid_method = as.numeric(polls3[[5]]$MidDate >= as.Date("2017-01-01")),
            
            y6_n = nrow(polls3[[6]]),
            y6_values = polls3[[6]][ , 4:10],
@@ -116,10 +118,10 @@ d1 <- list(mu_start = as.numeric(elections[1, ]),
 d1$y1_se <- d1$y1_se * sqrt(800 / 1500)
 
 # good discussion here on iterations and chains https://groups.google.com/forum/#!topic/stan-users/5WG51xKNSbA
-# The below is used on my 8 core machine
+# The below is used on my 8 core machine.  For production chains=4, iter=1200
 system.time({
   m1 <- stan(file = "method-statespace/ss-vectorized.stan", data = d1, 
-             chains = 4, iter = 1200, control = list(max_treedepth = 10))
+             chains = 4, iter = 1200, control = list(max_treedepth = 15))
 }) 
 # c. 6 hours original; 3.5 hours when standard errors only calculated once in advance. 20 minutes when re-parameterised. 
 # Back up to 80 minutes when made the innovations covary with eachother rather than independent
@@ -186,10 +188,10 @@ data.frame(d = round(summary(m1, pars = "d")$summary[, "mean"] * 100, 2),
            pollster = rep(pollsters, each = length(parties_ss)),
            party = rep(parties_ss, length(pollsters))) %>%
   arrange(party) %>%
-  ggplot(aes(y = party, colour = pollster, x = d)) +
+  ggplot(aes(y = party, colour = pollster, x = d, shape = pollster)) +
   geom_point(size = 2) +
   labs(x = "Average house effect (positive numbers mean the pollster over-estimates vote for that party)",
-       y = "", colour = "")
+       y = "", colour = "", shape = "")
 )
 dev.off()
 
@@ -202,3 +204,33 @@ names(sims_ss)[1:length(parties_ss)] <- parties_ss
 sims_ss <- select(sims_ss, -Other)
 
 seats_ss <- simulate_seats(sims_ss, prefix = "state-space")
+
+
+
+summary(m1, pars = "reid_impact")$summary %>%
+  as_tibble() 
+
+reid_impact <- rstan::extract(m1, "reid_impact") %>%
+  as.data.frame() %>%
+  as_tibble()
+
+names(reid_impact) <- parties_ss
+
+parties_v2 <- parties_v
+names(parties_v2) <- gsub("M.ori", "Maori", names(parties_v))
+
+svg("./output/reid-methodology-change-impact.svg", 8, 6)
+print(
+reid_impact %>%
+  gather(party, value) %>%
+  ggplot(aes(x = value, fill = party)) +
+  geom_density(alpha = 0.5) +
+  geom_vline(xintercept = 0) +
+  scale_fill_manual(values = parties_v2) +
+  facet_wrap(~party) +
+  theme(legend.position = "none") +
+  ggtitle("Estimated impact of the change in Reid Research methodology in 2017") +
+  scale_x_continuous("Increase in reported voting intention that can be attributed to the methodology change", 
+                     label = percent)
+)
+dev.off()

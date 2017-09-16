@@ -131,7 +131,8 @@ shinyServer(function(input, output) {
       layer_histograms(fill := ~Colour, stroke:= "white", width = 1) %>%
       set_options(height = 275) %>%
       add_axis("x", title = "Number of seats") %>%
-      add_axis("y", title = paste("Number of simulations out of", format(n, big.mark = ","))) %>%
+      add_axis("y", title_offset = 50,
+               title = paste("Number of simulations out of", format(n, big.mark = ","))) %>%
       add_tooltip(html = tool_func) %>%
       bind_shiny("seats_plot")
     

@@ -13,4 +13,4 @@ save(parties, file = "shiny/parties.rda")
 save(sims, file = "shiny/sims.rda")
 save(parties_ordered, file = "shiny/parties_ordered.rda")
 
-deployApp("shiny", appName = app_name, account = "ellisp")
+rsconnect::deployApp("shiny", appName = app_name, account = "ellisp", server = "shinyapps.io")

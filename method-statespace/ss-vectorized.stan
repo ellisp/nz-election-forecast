@@ -81,7 +81,7 @@ model {
   sigma ~ normal(0.002, 0.001);
   
   // prior for the effect of Reid Research's changed method in 2017
-  reid_impact ~ normal(zeroes, 0.03); // fairly tight prior because it's not plausibly  more than 10% change for a party
+  reid_impact ~ normal(zeroes, 0.02); // fairly tight prior because it's not plausibly  more than 10% change for a party
   
   // prior for correlation matrix of innovations, on standardised scale (so SD = 1)
   omega ~ lkj_corr(1); // LKJ prior on the correlation matrix 
@@ -103,7 +103,7 @@ model {
   // 2. Polls
   
   for(p in 1:n_pollsters)
-    d[p, ] ~ normal(0.0, 0.025); // ie a fairly loose prior for the house effects for each pollster.  
+    d[p, ] ~ normal(0.0, 0.03); // ie a fairly loose prior for the house effects for each pollster.  
     // Brought down from 0.075 to 0.025 on 18 August 2017 because it was converging to non-sensible results.
   
   // This can probably be improved by vectorising too  

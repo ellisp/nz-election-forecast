@@ -1,11 +1,15 @@
+# "Election eve" point and range predictions
+# 23 September 2017
+
 library(tidyverse)
+load("shiny/sims.rda")
 
 sims %>% 
   select(-model) %>%
   gather(party, value) %>%
   mutate(value = as.numeric(value)) %>%
   group_by(party) %>%
-  summarise(value = round(mean(value) * 100)) %>%
+  summarise(value = round(mean(value) * 100, 1)) %>%
   filter(value > 0) %>%
   arrange(desc(value))
 
@@ -22,3 +26,12 @@ sims %>%
   mutate(text = paste(party, low, "-", high)) %>%
   select(text)
 
+sims %>% 
+  gather(party, value, -model) %>%
+  mutate(value = as.numeric(value)) %>%
+  group_by(party, model) %>%
+  summarise(value = round(mean(value) * 100, 1)) %>%
+  filter(value > 0) %>%
+  spread(model, value) %>%
+  arrange(desc(`Model B`))
+  

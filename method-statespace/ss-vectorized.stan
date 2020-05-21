@@ -58,7 +58,7 @@ parameters {
   corr_matrix[n_parties] omega;
   real<lower=0> sigma[n_parties];           // standard deviations for daily innovations for each party
   real d[n_pollsters, n_parties];                     // house effects for n_pollsters and n_parties combinations
-  real reid_impact[n_parties];              // impact on each party of the change in Reid's method in 2017
+  real reid_impact;                         // impact on party 5 (Reid Research) of the change in Reid's method in 2017
 }
 
 transformed parameters {
@@ -122,7 +122,7 @@ model {
         y4_values[t, j] ~ normal(mu[y4_days[t], j] + d[4, j], y4_se[j] * inflator);
                               
     for(t in 1:y5_n)
-        y5_values[t, j] ~ normal(mu[y5_days[t], j] + d[5, j] + reid_impact[j] * reid_method[t], y5_se[j] * inflator);
+        y5_values[t, j] ~ normal(mu[y5_days[t], j] + d[5, j] + reid_impact * reid_method[t], y5_se[j] * inflator);
         
     for(t in 1:y6_n)
         y6_values[t, j] ~ normal(mu[y6_days[t], j] + d[6, j], y6_se[j] * inflator);

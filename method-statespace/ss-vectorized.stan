@@ -81,7 +81,7 @@ model {
   sigma ~ normal(0.002, 0.001);
   
   // prior for the effect of Reid Research's changed method in 2017
-  reid_impact ~ normal(zeroes, 0.02); // fairly tight prior because it's not plausibly  more than 10% change for a party
+  reid_impact ~ normal(0, 0.02); // fairly tight prior because it's not plausibly  more than 10% change for a party
   
   // prior for correlation matrix of innovations, on standardised scale (so SD = 1)
   omega ~ lkj_corr(1); // LKJ prior on the correlation matrix 

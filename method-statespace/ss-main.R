@@ -42,6 +42,10 @@ pollsters <- unique(polls2$Pollster)
 # and in ss-vectorized.stan
 expect_equal(length(pollsters), 6)
 
+# As we have a specific dummy variable later on for a Reid change in method, check that
+# they are number five in the vector
+expect_equal(pollsters[5], "Reid Research")
+
 polls3 <- lapply(pollsters, function(x){
   dplyr::filter(polls2, Pollster == x)
 })

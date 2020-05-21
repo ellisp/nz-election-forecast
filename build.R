@@ -19,6 +19,13 @@ library(viridis)
 library(rsconnect)
 library(rstan)
 library(testthat)
+library(tidyverse)
+library(scales)
+library(nzelect)
+library(forcats)
+library(rstan)
+library(directlabels)
+
 
 thefont <- "Calibri"
 
@@ -27,7 +34,7 @@ source("setup/functions.R")
 source("setup/simulate-seats.R")
 
 rstan_options(auto_write = TRUE)
-options(mc.cores = 3)
+options(mc.cores = 7)
 
 
 ThisElection <- "2017-09-23"
@@ -45,12 +52,7 @@ system.time({source("method-statespace/ss-main.R")})  # about 80 minutes on 12 J
 # (fastest version at 20 minutes required assuming iid innovations in state space)
 
 #================combined================
-# this takes simulations from the state space model, and
-# the same number from the GAM model, and combines the two
-equal_rows <- min(min(nrow(sims_gam), nrow(sims_ss)), 3000)
-
-sims_combined <- rbind(sims_gam[1:equal_rows, ], sims_ss[1:equal_rows, ])
-simulate_seats(sims_combined, prefix = "combined")
+simulate_seats(sims_ss)
 
 # manual edit needed at this point before re-creating the tracking plot
 source("tracking-plot.R")

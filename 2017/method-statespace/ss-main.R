@@ -1,19 +1,16 @@
-library(tidyverse)
-library(scales)
-library(nzelect)
-library(forcats)
-library(rstan)
-library(directlabels)
 
-rstan_options(auto_write = TRUE)
-options(mc.cores = 7)
+election_dates <-  as.Date(c("2011-11-26", "2014-09-20", "2017-09-23"))
+days_between_elections <- as.integer(diff(election_dates)) + 1
+
 
 
 parties_v2 <- c(parties_v, Maori = "#EF4A42", Other = "#151A61")
 
+# election results for the elections OTHER than the final one (which we are forecasting)
 elections <- polls %>%
   mutate(Party = gsub("M.ori", "Maori", Party)) %>%
   mutate(Party = fct_other(Party, keep = c("ACT", "National", "NZ First", "Labour", "Green", "Maori"))) %>%
+  filter(MidDate %in% election_dates[-length(election_dates)]) %>%
   group_by(Party, Pollster, MidDate, ElectionYear) %>%
   summarise(VotingIntention = sum(VotingIntention)) %>%
   filter(Pollster == "Election result") %>%
@@ -23,6 +20,7 @@ elections <- polls %>%
   select(ACT:Other)
 
 polls2 <- polls %>%
+  filter(Pollster != "YouGov") %>%
   mutate(Party = gsub("M.ori", "Maori", Party)) %>%
   mutate(Party = fct_other(Party, keep = c("ACT", "National", "NZ First", "Labour", "Green", "Maori"))) %>%
   group_by(Party, Pollster, MidDate, ElectionYear) %>%
@@ -35,8 +33,10 @@ polls2 <- polls %>%
   filter(Pollster != "Horizon Research") %>%
   spread(Party, VotingIntention, fill = 0) %>%
   ungroup() %>%
-  mutate(MidDateNumber = as.numeric(MidDate - as.Date("2011-11-25"))) # election was 26 November 2011
-  
+  # last election was 26 November 2011:
+  mutate(MidDateNumber = as.numeric(MidDate - as.Date("2011-11-25"))) %>%
+  filter(MidDate < max(election_dates))
+
 pollsters <- unique(polls2$Pollster)
 # if the number of pollsters isn't six we need to make some hard coded changes both here
 # and in ss-vectorized.stan
@@ -47,9 +47,6 @@ polls3 <- lapply(pollsters, function(x){
 })
 
 parties_ss <- names(elections)
-
-election_dates <-  as.Date(c("2011-11-26", "2014-09-20", "2017-09-23"))
-days_between_elections <- as.integer(diff(election_dates)) + 1
 
 
 # estimate the standard errors.  Note we are pretending they all have a sample size of 800 -
@@ -73,7 +70,7 @@ d1 <- list(mu_start = as.numeric(elections[1, ]),
            n_days = days_between_elections, 
            # multiply the variance of all polls by 2.  See my blog post of 9 July 2017.
            inflator = sqrt(2),
-
+           
            y1_n = nrow(polls3[[1]]),
            y1_values = polls3[[1]][ , 4:10],
            y1_days = as.numeric(polls3[[1]]$MidDateNumber),
@@ -122,7 +119,7 @@ d1$y1_se <- d1$y1_se * sqrt(800 / 1500)
 # The below is used on my 8 core machine.  For production chains=4, iter=1200
 system.time({
   m1 <- stan(file = "method-statespace/ss-vectorized.stan", data = d1, 
-             chains = 4, iter = 1200, control = list(max_treedepth = 15))
+             chains = 4, iter = 300, control = list(max_treedepth = 15))
 }) 
 # c. 6 hours original; 3.5 hours when standard errors only calculated once in advance. 20 minutes when re-parameterised. 
 # Back up to 80 minutes when made the innovations covary with eachother rather than independent
@@ -185,14 +182,14 @@ summary(m1, pars = "sigma")$summary %>%
 # house effects
 svg("./output/state-space-house-effects.svg", 8, 6)
 print(
-data.frame(d = round(summary(m1, pars = "d")$summary[, "mean"] * 100, 2),
-           pollster = rep(pollsters, each = length(parties_ss)),
-           party = rep(parties_ss, length(pollsters))) %>%
-  arrange(party) %>%
-  ggplot(aes(y = party, colour = pollster, x = d, shape = pollster)) +
-  geom_point(size = 2) +
-  labs(x = "Average house effect (positive numbers mean the pollster over-estimates vote for that party)",
-       y = "", colour = "", shape = "")
+  data.frame(d = round(summary(m1, pars = "d")$summary[, "mean"] * 100, 2),
+             pollster = rep(pollsters, each = length(parties_ss)),
+             party = rep(parties_ss, length(pollsters))) %>%
+    arrange(party) %>%
+    ggplot(aes(y = party, colour = pollster, x = d, shape = pollster)) +
+    geom_point(size = 2) +
+    labs(x = "Average house effect (positive numbers mean the pollster over-estimates vote for that party)",
+         y = "", colour = "", shape = "")
 )
 dev.off()
 
@@ -222,16 +219,16 @@ names(parties_v2) <- gsub("M.ori", "Maori", names(parties_v))
 
 svg("./output/reid-methodology-change-impact.svg", 8, 6)
 print(
-reid_impact %>%
-  gather(party, value) %>%
-  ggplot(aes(x = value, fill = party)) +
-  geom_density(alpha = 0.5) +
-  geom_vline(xintercept = 0) +
-  scale_fill_manual(values = parties_v2) +
-  facet_wrap(~party) +
-  theme(legend.position = "none") +
-  ggtitle("Estimated impact of the change in Reid Research methodology in 2017") +
-  scale_x_continuous("Increase in reported voting intention that can be attributed to the methodology change", 
-                     label = percent)
+  reid_impact %>%
+    gather(party, value) %>%
+    ggplot(aes(x = value, fill = party)) +
+    geom_density(alpha = 0.5) +
+    geom_vline(xintercept = 0) +
+    scale_fill_manual(values = parties_v2) +
+    facet_wrap(~party) +
+    theme(legend.position = "none") +
+    ggtitle("Estimated impact of the change in Reid Research methodology in 2017") +
+    scale_x_continuous("Increase in reported voting intention that can be attributed to the methodology change", 
+                       label = percent)
 )
 dev.off()

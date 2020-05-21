@@ -4,6 +4,7 @@
 library(tidyverse)
 load("shiny/sims.rda")
 
+# Combined point estimate
 sims %>% 
   select(-model) %>%
   gather(party, value) %>%
@@ -13,6 +14,7 @@ sims %>%
   filter(value > 0) %>%
   arrange(desc(value))
 
+# Range
 sims %>% 
   gather(party, value, -model) %>%
   mutate(value = 100 * as.numeric(value)) %>%
@@ -26,6 +28,7 @@ sims %>%
   mutate(text = paste(party, low, "-", high)) %>%
   select(text)
 
+# Model A compared to model B
 sims %>% 
   gather(party, value, -model) %>%
   mutate(value = as.numeric(value)) %>%

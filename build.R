@@ -25,19 +25,19 @@ library(nzelect)
 library(forcats)
 library(rstan)
 library(directlabels)
-
+library(lubridate)
 
 thefont <- "Calibri"
+
+rstan_options(auto_write = TRUE)
+options(mc.cores = 7)
 
 source("setup/set-fonts.R")
 source("setup/functions.R")
 source("setup/simulate-seats.R")
 
-rstan_options(auto_write = TRUE)
-options(mc.cores = 7)
 
-
-ThisElection <- "2017-09-23"
+ThisElection <- "2020-09-19"
 
 electionday <- tibble(
   MidDate = as.numeric(as.Date(ThisElection))

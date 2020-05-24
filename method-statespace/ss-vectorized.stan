@@ -11,10 +11,11 @@
 // add to complexity.
 
 data {
-  int n_days[2];                   // number of days between first, second and third elections
+  int n_days[3];                   // number of days between each election 
   int n_parties;                            // number of parties
   real mu_start[n_parties];                 // value at first election
-  real mu_finish[n_parties];                // value at second election
+  real mu_elect2[n_parties];                // value at second election
+  real mu_elect3[n_parties];                // value at third election
   real inflator;                      // amount by which to multiply the standard error of polls
   
   // note - pollsters are individually hard coded in to avoid having to use some kind of ragged array:
@@ -97,8 +98,9 @@ model {
   epsilon ~ multi_normal(zeroes, omega);  
   
   // measurement model
-  // 1. Election result for second election - treat as observation with a very big sample size
-  mu_finish ~ normal(mu[n_days[1], ], sqrt(.3 * .7 / 10 ^ 5));
+  // 1. Election result for second and third elections - treat as observations with a very big sample size
+  mu_elect2 ~ normal(mu[n_days[1], ], sqrt(.3 * .7 / 10 ^ 5));
+  mu_elect3 ~ normal(mu[n_days[2], ], sqrt(.3 * .7 / 10 ^ 5));
   
   // 2. Polls
   

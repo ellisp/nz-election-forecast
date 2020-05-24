@@ -39,7 +39,7 @@ options(mc.cores = 7)
 
 ThisElection <- "2017-09-23"
 
-electionday <- data_frame(
+electionday <- tibble(
   MidDate = as.numeric(as.Date(ThisElection))
 )
 
@@ -52,7 +52,7 @@ system.time({source("method-statespace/ss-main.R")})  # about 80 minutes on 12 J
 # (fastest version at 20 minutes required assuming iid innovations in state space)
 
 #================combined================
-simulate_seats(sims_ss)
+simulate_seats(sims_ss, prefix = "ss")
 
 # manual edit needed at this point before re-creating the tracking plot
 source("tracking-plot.R")

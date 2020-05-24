@@ -123,7 +123,7 @@ d1$y1_se <- d1$y1_se * sqrt(800 / 1500)
 # The below is used on my 8 core machine.  For production chains=4, iter=1200
 system.time({
   m1 <- stan(file = "method-statespace/ss-vectorized.stan", data = d1, 
-             chains = 4, iter = 300, control = list(max_treedepth = 15))
+             chains = 4, iter = 1200, control = list(max_treedepth = 15))
 }) 
 # c. 6 hours original; 3.5 hours when standard errors only calculated once in advance. 20 minutes when re-parameterised. 
 # Back up to 80 minutes when made the innovations covary with eachother rather than independent

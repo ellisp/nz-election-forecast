@@ -127,10 +127,29 @@ d1$y1_se <- d1$y1_se * sqrt(800 / 1500)
 # The below is used on my 8 core machine.  For production chains=4, iter=1200
 system.time({
   m1 <- stan(file = "method-statespace/ss-vectorized.stan", data = d1, 
-             chains = 4, iter = 1200, control = list(max_treedepth = 15))
+             chains = 4, iter = 1500, control = list(max_treedepth = 15))
 }) 
-# c. 6 hours original; 3.5 hours when standard errors only calculated once in advance. 20 minutes when re-parameterised. 
-# Back up to 80 minutes when made the innovations covary with eachother rather than independent
+# with 1200 iterations per chain this takes about 10 hours and still produces a warning about not enough
+# iterations (see below)
+
+
+# Warning messages when running with 1200 iterations per chain:
+#   1: There were 4 chains where the estimated Bayesian Fraction of Missing Information was low. See
+# http://mc-stan.org/misc/warnings.html#bfmi-low 
+# 2: Examine the pairs() plot to diagnose sampling problems
+# 
+# 3: The largest R-hat is NA, indicating chains have not mixed.
+# Running the chains for more iterations may help. See
+# http://mc-stan.org/misc/warnings.html#r-hat 
+# 4: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+# Running the chains for more iterations may help. See
+# http://mc-stan.org/misc/warnings.html#bulk-ess 
+# 5: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+# Running the chains for more iterations may help. See
+# http://mc-stan.org/misc/warnings.html#tail-ess 
+
+save(m1, file = glue("data/m1-{Sys.Date()}.rda"), compress = "xz")
+
 
 source("method-statespace/ss-diagnostics.R")
 
@@ -160,9 +179,8 @@ p1 <- s1 %>%
   scale_y_continuous(label = percent) +
   geom_vline(xintercept = as.numeric(election_dates), colour = "black") +
   ggtitle("Voting intention from the 2011 to the 2020 elections",
-          paste("State-space modelling based on polls from 2011 to", format(Sys.Date(), "%d %B %Y"))) 
-
-p1 <- p1 +  labs(caption = "https://freerangestats.io/elections/elections.html")
+          paste("State-space modelling based on polls from 2011 to", format(Sys.Date(), "%d %B %Y"))) +  
+  labs(caption = "https://freerangestats.io/elections/elections.html")
 
 p1f <- function(){
   print(p1)

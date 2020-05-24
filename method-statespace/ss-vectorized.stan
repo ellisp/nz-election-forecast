@@ -44,7 +44,7 @@ data {
   real y5_values[y5_n, n_parties];       
   int y5_days[y5_n];                     
   real y5_se[n_parties];
-  real reid_method[y5_n];
+  vector[y5_n] reid_method;
   
   int y6_n;
   real y6_values[y6_n, n_parties];       
@@ -102,30 +102,25 @@ model {
   
   // 2. Polls
   
+  // For each pollster, and each party, we model the observations of the vector of values each day
   for(p in 1:n_pollsters)
     d[p, ] ~ normal(0.0, 0.03); // ie a fairly loose prior for the house effects for each pollster.  
     // Brought down from 0.075 to 0.025 on 18 August 2017 because it was converging to non-sensible results.
   
-  // This can probably be improved by vectorising too  
+  
   for(j in 1:n_parties){
     
-    for(t in 1:y1_n)
-        y1_values[t, j] ~ normal(mu[y1_days[t], j] + d[1, j], y1_se[j] * inflator);
+        y1_values[, j] ~ normal(to_vector(mu[y1_days, j]) + d[1, j], y1_se[j] * inflator);
                               
-    for(t in 1:y2_n)
-        y2_values[t, j] ~ normal(mu[y2_days[t], j] + d[2, j], y2_se[j] * inflator);
+        y2_values[, j] ~ normal(to_vector(mu[y2_days, j]) + d[2, j], y2_se[j] * inflator);
                               
-    for(t in 1:y3_n)
-        y3_values[t, j] ~ normal(mu[y3_days[t], j] + d[3, j], y3_se[j] * inflator);
+        y3_values[, j] ~ normal(to_vector(mu[y3_days, j]) + d[3, j], y3_se[j] * inflator);
                               
-    for(t in 1:y4_n)
-        y4_values[t, j] ~ normal(mu[y4_days[t], j] + d[4, j], y4_se[j] * inflator);
+        y4_values[, j] ~ normal(to_vector(mu[y4_days, j]) + d[4, j], y4_se[j] * inflator);
                               
-    for(t in 1:y5_n)
-        y5_values[t, j] ~ normal(mu[y5_days[t], j] + d[5, j] + reid_impact * reid_method[t], y5_se[j] * inflator);
+        y5_values[, j] ~ normal(to_vector(mu[y5_days, j]) + d[5, j] + reid_impact * reid_method, y5_se[j] * inflator);
         
-    for(t in 1:y6_n)
-        y6_values[t, j] ~ normal(mu[y6_days[t], j] + d[6, j], y6_se[j] * inflator);
+        y6_values[, j] ~ normal(to_vector(mu[y6_days, j]) + d[6, j], y6_se[j] * inflator);
         
   }
 }

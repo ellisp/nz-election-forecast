@@ -46,10 +46,9 @@ electionday <- tibble(
 
 
 #================state space model==================
-# caution - takes more than an hour, has about 20,000 parameters to estimate
-# still needs some more refactoring!:
+# caution - takes more than an hour, has about 20,000 parameters to estimate:
 system.time({source("method-statespace/ss-main.R")})  # about 80 minutes on 12 July 2017
-# (fastest version at 20 minutes required assuming iid innovations in state space)
+
 
 #================combined================
 simulate_seats(sims_ss, prefix = "ss")

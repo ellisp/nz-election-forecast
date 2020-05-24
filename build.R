@@ -26,6 +26,7 @@ library(forcats)
 library(rstan)
 library(directlabels)
 library(lubridate)
+library(frs)
 
 thefont <- "Calibri"
 

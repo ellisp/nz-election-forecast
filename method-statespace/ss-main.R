@@ -159,19 +159,21 @@ p1 <- s1 %>%
   theme(legend.position= "none") +
   scale_y_continuous(label = percent) +
   geom_vline(xintercept = as.numeric(election_dates), colour = "black") +
-  ggtitle("Voting intention from the 2011 to the 2017 elections",
-          paste("State-space modelling based on polls from 2011 to", format(Sys.Date(), "%d %B %Y"))) +
-  labs(caption = "https://ellisp.github.io/elections/elections.html")
+  ggtitle("Voting intention from the 2011 to the 2020 elections",
+          paste("State-space modelling based on polls from 2011 to", format(Sys.Date(), "%d %B %Y"))) 
 
+p1 <- p1 +  labs(caption = "https://freerangestats.io/elections/elections.html")
 
-svg("./output/state-space-ribbons.svg", 10, 6)  
-print(p1)
-grid.text(0.65, 0.2, label = "Vertical lines indicate elections.  Points show poll results.
+p1f <- function(){
+  print(p1)
+  grid.text(0.65, 0.2, label = "Vertical lines indicate elections.  Points show poll results.
 Estimates of latent voting intention take into account past under 
 and over-estimates of polling firms.",
-          gp = gpar(fontfamily = thefont))
-dev.off()
+            gp = gpar(fontfamily = thefont))
+  
+}
 
+svg_png(p1f, "./output/state-space-ribbons", w = 10, h = 6)  
 
 # standard deviation - in percentage points (ie not proportions)
 # of the daily innovations
@@ -188,9 +190,7 @@ summary(m1, pars = "sigma")$summary %>%
 
 
 # house effects
-svg("./output/state-space-house-effects.svg", 8, 6)
-print(
-data.frame(d = round(summary(m1, pars = "d")$summary[, "mean"] * 100, 2),
+p2 <- data.frame(d = round(summary(m1, pars = "d")$summary[, "mean"] * 100, 2),
            pollster = rep(pollsters, each = length(parties_ss)),
            party = rep(parties_ss, length(pollsters))) %>%
   arrange(party) %>%
@@ -198,8 +198,9 @@ data.frame(d = round(summary(m1, pars = "d")$summary[, "mean"] * 100, 2),
   geom_point(size = 2) +
   labs(x = "Average house effect (positive numbers mean the pollster over-estimates vote for that party)",
        y = "", colour = "", shape = "")
-)
-dev.off()
+
+svg_png("./output/state-space-house-effects", w= 8, h= 6)
+
 
 # extract the simulations for the final election day (and make up for the the three tiny parties)
 sims_ss <- data.frame(rstan::extract(m1, "mu")$mu[ , sum(days_between_elections), ]) %>%

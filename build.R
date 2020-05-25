@@ -49,11 +49,12 @@ electionday <- tibble(
 
 #================state space model==================
 # caution - takes more than an hour, has about 20,000 parameters to estimate:
-system.time({source("method-statespace/ss-main.R")})  # about 80 minutes on 12 July 2017
+system.time({source("method-statespace/prep-and-fit.R")})  # about 80 minutes on 12 July 2017
 
+source("method-statespace/ss-diagnostics.R")
+source("method-statespace/results.R")
 
 #================combined================
-simulate_seats(sims_ss, prefix = "ss")
 
 # manual edit needed at this point before re-creating the tracking plot
 source("tracking-plot.R")

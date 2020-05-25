@@ -73,6 +73,9 @@ ses3 <- lapply(pollsters, function(x){
 d1 <- list(mu_start = as.numeric(elections[1, ]), 
            mu_elect2 = as.numeric(elections[2, ]),
            mu_elect3 = as.numeric(elections[3, ]), 
+           expected_mu_government = 0.3,
+           expected_sigma_government = 0.1,
+           party_govt_number = which(parties_ss == "Labour"),
            
            n_parties = length(parties_ss),
            n_days = days_between_elections, 
@@ -127,7 +130,7 @@ d1$y1_se <- d1$y1_se * sqrt(800 / 1500)
 # The below is used on my 8 core machine.  For production chains=4, iter=1200
 system.time({
   m1 <- stan(file = "method-statespace/ss-vectorized.stan", data = d1, 
-             chains = 4, iter = 1500, control = list(max_treedepth = 15))
+             chains = 4, iter = 100, control = list(max_treedepth = 15))
 }) 
 # with 1200 iterations per chain this takes about 10 hours and still produces a warning about not enough
 # iterations (see below)

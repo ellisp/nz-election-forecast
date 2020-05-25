@@ -11,12 +11,15 @@
 // add to complexity.
 
 data {
-  int n_days[3];                   // number of days between each election 
-  int n_parties;                            // number of parties
-  real mu_start[n_parties];                 // value at first election
-  real mu_elect2[n_parties];                // value at second election
-  real mu_elect3[n_parties];                // value at third election
-  real inflator;                      // amount by which to multiply the standard error of polls
+  int n_days[3];                                   // number of days between each election 
+  int n_parties;                                   // number of parties
+  real mu_start[n_parties];                        // value at first election
+  real mu_elect2[n_parties];                       // value at second election
+  real mu_elect3[n_parties];                       // value at third election
+  real<lower=0, upper = 1> expected_mu_govt;       // prior expectation of government vote at coming election
+  real expected_sigma_govt;                        // standard deviation of government vote at coming election
+  int<lower=1, upper=n_parties> party_govt_number; // which party number is the government
+  real inflator;                                   // amount by which to multiply the standard error of polls
   
   // note - pollsters are individually hard coded in to avoid having to use some kind of ragged array:
   int n_pollsters;
@@ -59,7 +62,7 @@ parameters {
   corr_matrix[n_parties] omega;
   real<lower=0> sigma[n_parties];           // standard deviations for daily innovations for each party
   real d[n_pollsters, n_parties];                     // house effects for n_pollsters and n_parties combinations
-  real reid_impact;                         // impact on party 5 (Reid Research) of the change in Reid's method in 2017
+  real reid_impact[n_parties];                         // impact on party 5 (Reid Research) of the change in Reid's method in 2017
 }
 
 transformed parameters {
@@ -82,14 +85,10 @@ model {
   sigma ~ normal(0.002, 0.001);
   
   // prior for the effect of Reid Research's changed method in 2017
-  reid_impact ~ normal(0, 0.02); // fairly tight prior because it's not plausibly  more than 10% change for a party
+  reid_impact ~ normal(zeroes, 0.02); // fairly tight prior because it's not plausibly  more than 10% change for a party
   
   // prior for correlation matrix of innovations, on standardised scale (so SD = 1)
   omega ~ lkj_corr(1); // LKJ prior on the correlation matrix 
-  
-  // prior for incumbency, from separate "political science" style model.  Doesn't work...
-  // Fixing this could be key to making this a decent combination of political science and polls.
-  // mu[5, sum(n_days)] ~ normal(0.45, 0.06);
   
   // innovations in the state space, on standardised scale
   // Note - when this is done as iid normal rather than multi_normal it makes things
@@ -101,6 +100,8 @@ model {
   // 1. Election result for second and third elections - treat as observations with a very big sample size
   mu_elect2 ~ normal(mu[n_days[1], ], sqrt(.3 * .7 / 10 ^ 5));
   mu_elect3 ~ normal(mu[n_days[2], ], sqrt(.3 * .7 / 10 ^ 5));
+  // prior for incumbency, from separate "political science" style model:
+  expected_mu_govt ~ normal(mu[n_days[3], party_govt_number], expected_sigma_govt);
   
   // 2. Polls
   
@@ -120,7 +121,8 @@ model {
                               
         y4_values[, j] ~ normal(to_vector(mu[y4_days, j]) + d[4, j], y4_se[j] * inflator);
                               
-        y5_values[, j] ~ normal(to_vector(mu[y5_days, j]) + d[5, j] + reid_impact * reid_method, y5_se[j] * inflator);
+        y5_values[, j] ~ normal(to_vector(mu[y5_days, j]) + d[5, j] + 
+                              reid_impact[j] * reid_method, y5_se[j] * inflator);
         
         y6_values[, j] ~ normal(to_vector(mu[y6_days, j]) + d[6, j], y6_se[j] * inflator);
         

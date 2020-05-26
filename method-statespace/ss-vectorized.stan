@@ -13,7 +13,7 @@
 data {
   int n_days[3];                                   // number of days between each election 
   int n_parties;                                   // number of parties
-  real mu_start[n_parties];                        // value at first election
+  real mu_elect1[n_parties];                        // value at first election
   real mu_elect2[n_parties];                       // value at second election
   real mu_elect3[n_parties];                       // value at third election
   real<lower=0, upper = 1> expected_mu_govt;       // prior expectation of government vote at coming election
@@ -68,7 +68,7 @@ parameters {
 transformed parameters {
   real mu[sum(n_days), n_parties];     // underlying state of vote intention, as a proportion (not percentage)
   
-  mu[1, ] = mu_start;
+  mu[1, ] = mu_elect1;
   for(i in 2:sum(n_days)){
     for(j in 1:n_parties){
       mu[i, j] = mu[i-1, j] + epsilon[i][j] * sigma[j];
@@ -99,9 +99,9 @@ model {
   // measurement model
   // 1. Election result for second and third elections - treat as observations with a very big sample size
   mu_elect2 ~ normal(mu[n_days[1], ], sqrt(.3 * .7 / 10 ^ 5));
-  mu_elect3 ~ normal(mu[n_days[2], ], sqrt(.3 * .7 / 10 ^ 5));
+  mu_elect3 ~ normal(mu[n_days[1] + n_days[2], ], sqrt(.3 * .7 / 10 ^ 5));
   // prior for incumbency, from separate "political science" style model:
-  expected_mu_govt ~ normal(mu[n_days[3], party_govt_number], expected_sigma_govt);
+  expected_mu_govt ~ normal(mu[sum(n_days), party_govt_number], expected_sigma_govt);
   
   // 2. Polls
   

@@ -62,7 +62,7 @@ p2 <- data.frame(d = round(summary(m1, pars = "d")$summary[, "mean"] * 100, 2),
   labs(x = "Average house effect (positive numbers mean the pollster over-estimates vote for that party)",
        y = "", colour = "", shape = "")
 
-svg_png("./output/state-space-house-effects", w= 8, h= 6)
+svg_png(p2, "./output/state-space-house-effects", w= 8, h= 6)
 
 
 # extract the simulations for the final election day (and make up for the the three tiny parties)
@@ -89,9 +89,7 @@ names(reid_impact) <- parties_ss
 parties_v2 <- parties_v
 names(parties_v2) <- gsub("M.ori", "Maori", names(parties_v))
 
-svg("./output/reid-methodology-change-impact.svg", 8, 6)
-print(
-  reid_impact %>%
+p3 <- reid_impact %>%
     gather(party, value) %>%
     ggplot(aes(x = value, fill = party)) +
     geom_density(alpha = 0.5) +
@@ -102,5 +100,5 @@ print(
     ggtitle("Estimated impact of the change in Reid Research methodology in 2017") +
     scale_x_continuous("Increase in reported voting intention that can be attributed to the methodology change", 
                        label = percent)
-)
-dev.off()
+
+svg_png(p3, "./output/reid-methodology-change-impact", 8, 6)

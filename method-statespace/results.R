@@ -66,10 +66,7 @@ svg_png(p2, "./output/state-space-house-effects", w= 8, h= 6)
 
 
 # extract the simulations for the final election day (and make up for the the three tiny parties)
-sims_ss <- data.frame(rstan::extract(m1, "mu")$mu[ , sum(days_between_elections), ]) %>%
-  mutate(Conservative = rbeta(n(), 1, 3) / 100,
-         `United Future` = rbeta(n(), 1, 3) / 100,
-         Mana = rbeta(n(), 1, 3) / 100)
+sims_ss <- data.frame(rstan::extract(m1, "mu")$mu[ , sum(days_between_elections), ]) 
 names(sims_ss)[1:length(parties_ss)] <- parties_ss
 sims_ss <- select(sims_ss, -Other)
 

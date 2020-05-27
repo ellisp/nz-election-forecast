@@ -27,8 +27,8 @@ simulate_seats <- function(sims, prefix){
           scale_x_continuous(label = percent) +
           labs(x = "Predicted party vote on election day", 
                y = "Likelihood",
-               caption = "Source: https://ellisp.github.io") +
-          ggtitle("Predicted party vote for the 23 September 2017 New Zealand General Election",
+               caption = "Source: http://freerangestats.info") +
+          ggtitle(glue("Predicted party vote for the {format(as.Date(ThisElection), '%d %B %Y')} New Zealand General Election"),
                   "Simulations based on predictions from polling data")
   )
   dev.off()
@@ -51,13 +51,13 @@ simulate_seats <- function(sims, prefix){
       prob_oth = 1 - prob_lab)
   
   
-  # a filler data frame of the three parties that don't get any simulated electorate seats.
+  # a filler data frame of the parties that don't get any simulated electorate seats.
   # Note that NZ First isn't really a certainty to get their seat, but it doesn't matter as they are 
   # almost certainly above the 5% threshold anyway, so we don't bother to simulate Northland
   filler <- data.frame(
-    party = c("Conservative", "Green", "NZ First", "United Future"),
-    seats = c(0, 0, 1, 0),
-    sim = rep(1:n, each = 4)
+    party = c("Green", "NZ First"),
+    seats = c(0, 1),
+    sim = rep(1:n, each = 2)
   )
   
   # see https://en.wikipedia.org/wiki/M%C4%81ori_electorates for the true names of the Maori electorates.
@@ -67,7 +67,7 @@ simulate_seats <- function(sims, prefix){
   # need to be in the simulation at all for the off chance they take Epsom off ACT.
   electorate_sims <- data_frame(
     epsom = sample(c("ACT", "National", "Labour"), prob = c(0.8, 0.1, 0.1), size = n, replace = TRUE),
-    m1 = sample(c("Labour", "Mana"), prob = m_votes_2014[1, 3:4], size = n, replace = TRUE),
+    m1 = sample(c("Labour", "Maori"), prob = m_votes_2014[1, 3:4], size = n, replace = TRUE),
     m2 = sample(c("Labour", "Maori"), prob = m_votes_2014[2, 3:4], size = n, replace = TRUE),
     m3 = sample(c("Labour", "Maori"), prob = m_votes_2014[3, 3:4], size = n, replace = TRUE),
     m4 = sample(c("Labour", "Maori"), prob = m_votes_2014[4, 3:4], size = n, replace = TRUE),
@@ -99,12 +99,12 @@ simulate_seats <- function(sims, prefix){
   names(seats) <- gsub("NZ First", "NZ_First", names(seats))
   
   seats <- seats %>%
-    mutate(NatCoal = ACT + Conservative + National + `United Future` + Maori,
+    mutate(NatCoal = ACT + National + Maori,
            LabGreen = Labour + Green,
            LabGreenMaori = Labour + Green + Maori,
            LabGreenNZFirst = Labour + Green + NZ_First,
            NatCoalNZFirst = NatCoal + NZ_First)
-  seats$Total <- apply(seats[ , 1:9], 1, sum)
+  seats$Total <- apply(seats[ , 1:length(all_parties)], 1, sum)
   
   
   #==================presentation=====================
@@ -130,7 +130,7 @@ simulate_seats <- function(sims, prefix){
   png(paste0("./output/", prefix, "-results-pairs.png"), 8 * 300, 7 * 300, res = 300)
   par(family = thefont, bty = "n", font.main = 1)
   seats %>%
-    mutate(Other = as.ordered(ACT + `United Future` + Conservative + Mana + Maori)) %>%
+    mutate(Other = as.ordered(ACT + Maori)) %>%
     dplyr::select(Green, Labour, National, NZ_First, Other) %>%
     pairs(diag.panel = panel.hist, upper.panel = panel.cor,
           main = paste("Possible outcomes for number of seats on", format(as.Date(ThisElection), "%d %B %Y")))
@@ -143,8 +143,8 @@ simulate_seats <- function(sims, prefix){
               `Labour + Green win by themselves` = mean(LabGreen > Total / 2),
               `Either grouping needs\na coalition with NZ First` = 
                 mean((Green + Labour + NZ_First) >= Total / 2) - `Labour + Green win by themselves`,
-              `Labour + Greens + Mana + NZ First\nexact tie with National-led coalition` =
-                mean((LabGreen + Mana + NZ_First) == Total / 2))
+              `Labour + Greens + NZ First\nexact tie with National-led coalition` =
+                mean((LabGreen + NZ_First) == Total / 2))
   
   
   svg(paste0("./output/", prefix, "-final-chances-bar.svg"), 8, 3)

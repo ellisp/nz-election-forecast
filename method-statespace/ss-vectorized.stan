@@ -101,7 +101,7 @@ model {
   mu_elect2 ~ normal(mu[n_days[1], ], sqrt(.3 * .7 / 10 ^ 5));
   mu_elect3 ~ normal(mu[n_days[1] + n_days[2], ], sqrt(.3 * .7 / 10 ^ 5));
   // prior for incumbency, from separate "political science" style model:
-  expected_mu_govt ~ normal(mu[sum(n_days), party_govt_number], expected_sigma_govt);
+  expected_mu_govt ~ student_t(1, mu[sum(n_days), party_govt_number], expected_sigma_govt);
   
   // 2. Polls
   

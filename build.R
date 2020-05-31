@@ -1,6 +1,8 @@
 source("setup/functionality.R")
 
-fit_model <- FALSE
+# Need this to be TRUE at least the first time you run the model, and whenever there is a new poll 
+# available in nzelect
+fit_model <- TRUE
 
 ThisElection <- "2020-09-19"
 
@@ -22,24 +24,7 @@ source("method-statespace/results.R")
 
 source("setup/copy-files.R")
 
-#================combined================
 
-# # manual edit needed at this point before re-creating the tracking plot
-# source("tracking-plot.R")
-# 
-# #=======for shiny app and final distribution========
-# # which simulated party vote to use for shiny app?
-# sims <- sims_combined %>%
-#   mutate(model = rep(c("Model A", "Model B"), each = equal_rows))
-# 
-# # set which shiny app to deploy: nz-election-2017 for produ, nz-election-2017-test for testing
-# app_name <- "nz-election-2017-test"
-# # app_name <- "nz-election-2017"
-# source("setup/shiny-prep.R")
-# 
-# 
-# 
-# 
 
 
 

@@ -2,7 +2,8 @@
 
 #' @param sims a matrix or data frame of simulated party vote, one row per simulation, one column per party
 #' @param prefix either "ss", "gam" or "combined" for state-space or GAM model.  Used as prefix for the saved SVGs
-simulate_seats <- function(sims, prefix, ThisElection){
+simulate_seats <- function(sims, prefix, ThisElection, seed = 123){
+  set.seed(seed)
   # parameter checks...
   
   
@@ -21,9 +22,9 @@ simulate_seats <- function(sims, prefix, ThisElection){
   
   p1 <- sims_tidy %>%
           ggplot(aes(x = Vote, fill = Party)) +
-          geom_density(alpha = 0.1, colour = NA) +
+          geom_density(alpha = 0.5, colour = NA) +
           facet_wrap(~Party, scales = "free") +
-          scale_x_continuous(label = percent) +
+          scale_x_continuous(label = percent_format(accuracy = 1)) +
             scale_fill_manual(values = parties_v2) +
           labs(x = "Predicted party vote on election day", 
                y = "Likelihood",
@@ -111,22 +112,25 @@ simulate_seats <- function(sims, prefix, ThisElection){
   #==================presentation=====================
   
   p2 <- seats %>%
-    select(National, NatCoal, LabGreen, LabGreenNZFirst, NatCoalNZFirst) %>%
+    select(National, Labour, NatCoal, LabGreen, LabGreenNZFirst, NatCoalNZFirst) %>%
     gather(Coalition, Seats) %>%
-    ggplot(aes(x = Seats, colour = Coalition, fill = Coalition)) +
-    geom_histogram(alpha = 0.5, binwidth = 1, position = "identity")  +
-    #  facet_wrap(~Coalition)+
+    mutate(lab_in = ifelse(grepl("^Lab", Coalition), "Labour-based", "Nationals-based")) %>%
+    mutate(Coalition = gsub("^LabGreen", "Labour, Greens", Coalition),
+           Coalition = gsub("^NatCoal", "National, ACT, Maori Party", Coalition),
+           Coalition = gsub("NZFirst", ", NZ First", Coalition)) %>%
+    ggplot(aes(x = Seats, fill = lab_in)) +
+    facet_wrap(~Coalition, ncol = 1) +
+    geom_histogram(alpha = 0.5, binwidth = 1, position = "identity", colour = NA)  +
     scale_y_continuous() +
-    ggtitle("Likely seat counts for various combinations of parties",
-            "Most likely outcome is that New Zealand First are needed to build a majority.") +
-    labs(caption = paste("Source: http://freerangestats.info; model", prefix),
-         y = "Likelihood")
+    labs(title = glue("Possible government-formation in the {substring(ThisElection, 1, 4)} New Zealand election"),
+         subtitle = "Likely seat counts for various combinations of parties. 'NatCoal' means Nationals, ACT and Māori parties",
+         caption = paste("Source: http://freerangestats.info; model", prefix),
+         y = "Likelihood") +
+    expand_limits(y = c(0, 500)) +
+    scale_fill_manual(values = as.character(c(parties_v2["Labour"], parties_v2["National"]))) +
+    theme(legend.position = "none", panel.grid.minor = element_blank())
   
-  pf2 <- function(){
-    print(direct.label(p2, "top.bumpup"))  
-  }
-  
-  svg_png(pf2, paste0("./output/", prefix, "-results-density"), 9, 4)
+  svg_png(p2, paste0("./output/", prefix, "-results-density"), 9, 7)
   
 
   
@@ -175,7 +179,7 @@ simulate_seats <- function(sims, prefix, ThisElection){
           mutate(Party = fct_reorder(Party, Number)) %>%
           ggplot(aes(x = Number, y = ..density..)) +
           facet_wrap(~Party, scales = "free", ncol = 5) +
-          geom_histogram(binwidth = 1, fill = "steelblue", alpha = 0.5, colour = "steelblue") +
+          geom_histogram(binwidth = 1, fill = "steelblue", alpha = 0.5, colour = NA) +
           labs(x = "Number of seats", y = "Probability",
                caption = "http://freerangestats.info") +
           ggtitle(glue("Simulated election outcomes for {format(as.Date(ThisElection), '%d %B %Y')}"),

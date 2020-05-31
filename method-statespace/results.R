@@ -95,7 +95,7 @@ names(parties_v2) <- gsub("M.ori", "Maori", names(parties_v))
 p3 <- reid_impact %>%
     gather(party, value) %>%
     ggplot(aes(x = value, fill = party)) +
-    geom_density(alpha = 0.5) +
+    geom_density(alpha = 0.5, colour = NA) +
     geom_vline(xintercept = 0) +
     scale_fill_manual(values = parties_v2) +
     facet_wrap(~party) +

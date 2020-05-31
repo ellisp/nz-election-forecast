@@ -17,7 +17,8 @@ data {
   real mu_elect2[n_parties];                       // value at second election
   real mu_elect3[n_parties];                       // value at third election
   real<lower=0, upper = 1> expected_mu_govt;       // prior expectation of government vote at coming election
-  real expected_sigma_govt;                        // standard deviation of government vote at coming election
+  real<lower=0> expected_sigma_govt;                        // standard deviation of government vote at coming election
+  int<lower=1> expected_df_govt;                            // degrees of freedom of t distribution of prior for govt
   int<lower=1, upper=n_parties> party_govt_number; // which party number is the government
   real inflator;                                   // amount by which to multiply the standard error of polls
   
@@ -101,7 +102,7 @@ model {
   mu_elect2 ~ normal(mu[n_days[1], ], sqrt(.3 * .7 / 10 ^ 5));
   mu_elect3 ~ normal(mu[n_days[1] + n_days[2], ], sqrt(.3 * .7 / 10 ^ 5));
   // prior for incumbency, from separate "political science" style model:
-  expected_mu_govt ~ student_t(1, mu[sum(n_days), party_govt_number], expected_sigma_govt);
+  expected_mu_govt ~ student_t(expected_df_govt, mu[sum(n_days), party_govt_number], expected_sigma_govt);
   
   // 2. Polls
   

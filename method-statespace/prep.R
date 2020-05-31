@@ -75,6 +75,7 @@ d1 <- list(mu_elect1 = as.numeric(elections[1, ]),
            mu_elect3 = as.numeric(elections[3, ]), 
            expected_mu_govt = 0.3689 + mu_prior,
            expected_sigma_govt = sigma_prior,
+           expected_df_govt = 4,
            party_govt_number = which(parties_ss == "Labour"),
            
            n_parties = length(parties_ss),

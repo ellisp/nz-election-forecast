@@ -20,6 +20,8 @@ if(fit_model){
 source("method-statespace/ss-diagnostics.R")
 source("method-statespace/results.R")
 
+source("setup/copy-files.R")
+
 #================combined================
 
 # # manual edit needed at this point before re-creating the tracking plot
@@ -29,8 +31,6 @@ source("method-statespace/results.R")
 # # which simulated party vote to use for shiny app?
 # sims <- sims_combined %>%
 #   mutate(model = rep(c("Model A", "Model B"), each = equal_rows))
-# 
-# source("setup/copy-files.R")
 # 
 # # set which shiny app to deploy: nz-election-2017 for produ, nz-election-2017-test for testing
 # app_name <- "nz-election-2017-test"

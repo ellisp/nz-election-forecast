@@ -27,7 +27,7 @@ p1 <- s1 %>%
   labs(x = "", y = "Party vote") +
   facet_wrap(~Party, scales = "free_y") +
   theme(legend.position= "none") +
-  scale_y_continuous(label = percent) +
+  scale_y_continuous(label = percent_format(accuracy = 1)) +
   geom_vline(xintercept = as.numeric(election_dates), colour = "black") +
   ggtitle("Voting intention from the 2011 to the 2020 elections",
           paste("State-space modelling based on polls from 2011 to", format(Sys.Date(), "%d %B %Y"))) +  

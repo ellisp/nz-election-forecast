@@ -26,6 +26,7 @@ simulate_seats <- function(sims, prefix, ThisElection, seed = 123){
           facet_wrap(~Party, scales = "free") +
           scale_x_continuous(label = percent_format(accuracy = 1)) +
             scale_fill_manual(values = parties_v2) +
+          theme(legend.position = "none") +
           labs(x = "Predicted party vote on election day", 
                y = "Likelihood",
                caption = "Source: http://freerangestats.info") +
@@ -123,7 +124,7 @@ simulate_seats <- function(sims, prefix, ThisElection, seed = 123){
     geom_histogram(alpha = 0.5, binwidth = 1, position = "identity", colour = NA)  +
     scale_y_continuous() +
     labs(title = glue("Possible government-formation in the {substring(ThisElection, 1, 4)} New Zealand election"),
-         subtitle = "Likely seat counts for various combinations of parties. 'NatCoal' means Nationals, ACT and Māori parties",
+         subtitle = glue("Likely seat counts for various combinations of parties, based on {nrow(sims)} simulations"),
          caption = paste("Source: http://freerangestats.info; model", prefix),
          y = "Likelihood") +
     expand_limits(y = c(0, 500)) +

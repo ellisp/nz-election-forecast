@@ -1,5 +1,8 @@
-latest_data <- tail(list.files("data", pattern = "m1.*\\.rda$", full.names = TRUE), 1)
-load(latest_data)
+
+if(!exists("m1")){
+  latest_data <- tail(list.files("data", pattern = "m1.*\\.rda$", full.names = TRUE), 1)
+  load(latest_data)
+}
 
 s1 <- summary(m1, pars = "mu")$summary %>%
   as_tibble() %>%

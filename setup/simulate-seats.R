@@ -33,21 +33,18 @@ simulate_seats <- function(sims, prefix, ThisElection){
   )
   dev.off()
   
-  
-  # allocating vote for Maori seats done based on discussion at
-  # http://www.newshub.co.nz/home/politics/2017/02/what-the-mana-maori-deal-would-ve-meant-in-the-2014-election.html
+  # According to this commentary https://www.waateanews.com/waateanews/x_news/MjQ1NzU/Opinion/What-latest-Poll-means-for-the-Maori-Party?
+  # the Maori Party have a chance of winning two Maori electorates
   # For lack of any better way of doing it, I give Labour a probability of winning proportionate to their
-  # votes in the 2014 election compared to the combined Mana/Maori party votes, having knocked 10% off
-  # those Mana/Maori party votes (this is the magic parameter "0.9" in the below - but I tried reducing this
-  # as much as to 0.3 ie a collapse in the Maori/Mana vote, without changing the substantive conclusions 
-  # from the overall simulation)
-  m_votes_2014 <- data_frame(
-    labour = c(9712, 7533, 8089, 9753, 8445, 12191, 5837),
-    mana_maori = c(11548, 8695, 8475, 8928, 6887, 7612, 15208)
+  # votes in the last election compared to the combined Maori party votes, having knocked 20% off
+  # those Maori party votes (this is the magic parameter "0.8" in the below)
+  m_votes_last_election <- tibble(
+    labour = c(14279, 15233, 12220, 13475, 14446, 13484, 14144),
+    maori = c(2635, 3058, 2258, 3448, 1615, 2030, 4730)
   ) %>%
     mutate(
-      mana_maori = mana_maori * 0.9,
-      prob_lab = labour / (mana_maori + labour),
+      maori = maori * 0.8,
+      prob_lab = labour / (maori + labour),
       prob_oth = 1 - prob_lab)
   
   
@@ -67,13 +64,13 @@ simulate_seats <- function(sims, prefix, ThisElection){
   # need to be in the simulation at all for the off chance they take Epsom off ACT.
   electorate_sims <- data_frame(
     epsom = sample(c("ACT", "National", "Labour"), prob = c(0.8, 0.1, 0.1), size = n, replace = TRUE),
-    m1 = sample(c("Labour", "Maori"), prob = m_votes_2014[1, 3:4], size = n, replace = TRUE),
-    m2 = sample(c("Labour", "Maori"), prob = m_votes_2014[2, 3:4], size = n, replace = TRUE),
-    m3 = sample(c("Labour", "Maori"), prob = m_votes_2014[3, 3:4], size = n, replace = TRUE),
-    m4 = sample(c("Labour", "Maori"), prob = m_votes_2014[4, 3:4], size = n, replace = TRUE),
-    m5 = sample(c("Labour", "Maori"), prob = m_votes_2014[5, 3:4], size = n, replace = TRUE),
-    m6 = sample(c("Labour", "Maori"), prob = m_votes_2014[6, 3:4], size = n, replace = TRUE),
-    m7 = sample(c("Labour", "Maori"), prob = m_votes_2014[7, 3:4], size = n, replace = TRUE)
+    m1 = sample(c("Labour", "Maori"), prob = m_votes_last_election[1, 3:4], size = n, replace = TRUE),
+    m2 = sample(c("Labour", "Maori"), prob = m_votes_last_election[2, 3:4], size = n, replace = TRUE),
+    m3 = sample(c("Labour", "Maori"), prob = m_votes_last_election[3, 3:4], size = n, replace = TRUE),
+    m4 = sample(c("Labour", "Maori"), prob = m_votes_last_election[4, 3:4], size = n, replace = TRUE),
+    m5 = sample(c("Labour", "Maori"), prob = m_votes_last_election[5, 3:4], size = n, replace = TRUE),
+    m6 = sample(c("Labour", "Maori"), prob = m_votes_last_election[6, 3:4], size = n, replace = TRUE),
+    m7 = sample(c("Labour", "Maori"), prob = m_votes_last_election[7, 3:4], size = n, replace = TRUE)
   ) %>%
     mutate(sim = 1:n()) %>%
     gather(seat, party, -sim) %>%
@@ -86,7 +83,8 @@ simulate_seats <- function(sims, prefix, ThisElection){
   
   
   #============allocate seats==================
-  
+  # So far we have allocated "electorate" seats. Now we pad these out with
+  # party lists in accordance iwth the MMP rules.
   
   seats <- t(sapply(1:n, function(i){
     allocate_seats(votes = as.numeric(sims[i, ]), 
@@ -160,7 +158,7 @@ simulate_seats <- function(sims, prefix, ThisElection){
           scale_fill_viridis(discrete = TRUE, option = "C", begin = 0.1, end = 0.9) +
           labs(x = "", caption = "Source: https://ellisp.github.io") +
           ggtitle(glue("Probable outcomes for the New Zealand {format(as.Date(ThisElection), '%d %B %Y')} General Election"),
-                  paste("Modelling based on polls from 2014 to", format(Sys.Date(), "%d %B %Y")))
+                  paste("Modelling based on polls from 2011 to", format(Sys.Date(), "%d %B %Y")))
   )
   dev.off()
   

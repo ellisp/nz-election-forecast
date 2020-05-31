@@ -2,7 +2,7 @@
 
 #' @param sims a matrix or data frame of simulated party vote, one row per simulation, one column per party
 #' @param prefix either "ss", "gam" or "combined" for state-space or GAM model.  Used as prefix for the saved SVGs
-simulate_seats <- function(sims, prefix){
+simulate_seats <- function(sims, prefix, ThisElection){
   # parameter checks...
   
   
@@ -118,7 +118,7 @@ simulate_seats <- function(sims, prefix){
     scale_y_continuous() +
     ggtitle("Likely seat counts for various combinations of parties",
             "Most likely outcome is that New Zealand First are needed to build a majority.") +
-    labs(caption = paste("Source: https://ellisp.github.io; model", prefix),
+    labs(caption = paste("Source: http://freerangestats.info; model", prefix),
          y = "Likelihood")
   
   svg(paste0("./output/", prefix, "-results-density.svg"), 9, 4)
@@ -159,7 +159,7 @@ simulate_seats <- function(sims, prefix){
           theme(legend.position = "none") +
           scale_fill_viridis(discrete = TRUE, option = "C", begin = 0.1, end = 0.9) +
           labs(x = "", caption = "Source: https://ellisp.github.io") +
-          ggtitle("Probable outcomes for the New Zealand 2017 General Election",
+          ggtitle(glue("Probable outcomes for the New Zealand {format(as.Date(ThisElection), '%d %B %Y')} General Election"),
                   paste("Modelling based on polls from 2014 to", format(Sys.Date(), "%d %B %Y")))
   )
   dev.off()
@@ -174,7 +174,7 @@ simulate_seats <- function(sims, prefix){
           geom_histogram(binwidth = 1, fill = "steelblue", alpha = 0.5, colour = "steelblue") +
           labs(x = "Number of seats", y = "Probability",
                caption = "http://ellisp.github.io") +
-          ggtitle("Simulated election outcomes, 2017",
+          ggtitle(glue("Simulated election outcomes for {format(as.Date(ThisElection), '%d %B %Y')}"),
                   "Forecasts based on opinion poll trends, calibrated to previous election outcomes"))
   dev.off()
   

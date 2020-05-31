@@ -1,3 +1,6 @@
+latest_data <- tail(list.files("data", pattern = "m1.*\\.rda$", full.names = TRUE), 1)
+load(latest_data)
+
 s1 <- summary(m1, pars = "mu")$summary %>%
   as_tibble() %>%
   mutate(Party = rep(parties_ss, sum(days_between_elections)),
@@ -70,7 +73,7 @@ sims_ss <- data.frame(rstan::extract(m1, "mu")$mu[ , sum(days_between_elections)
 names(sims_ss)[1:length(parties_ss)] <- parties_ss
 sims_ss <- select(sims_ss, -Other)
 
-seats_ss <- simulate_seats(sims_ss, prefix = "state-space")
+seats_ss <- simulate_seats(sims_ss, prefix = "state-space", ThisElection = ThisElection)
 
 
 

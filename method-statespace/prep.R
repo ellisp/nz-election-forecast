@@ -38,7 +38,7 @@ polls2 <- polls %>%
   # days since the first election in our model:
   mutate(MidDateNumber = 1 + as.numeric(MidDate - election_dates[1])) %>%
   filter(MidDate < max(election_dates))
-  
+
 pollsters <- unique(polls2$Pollster)
 # if the number of pollsters isn't six we need to make some hard coded changes both here
 # and in ss-vectorized.stan
@@ -81,7 +81,7 @@ d1 <- list(mu_elect1 = as.numeric(elections[1, ]),
            n_days = days_between_elections, 
            # multiply the variance of all polls by 2.  See my blog post of 9 July 2017.
            inflator = sqrt(2),
-
+           
            y1_n = nrow(polls3[[1]]),
            y1_values = polls3[[1]][ , 4:10],
            y1_days = as.numeric(polls3[[1]]$MidDateNumber),
@@ -120,18 +120,3 @@ d1 <- list(mu_elect1 = as.numeric(elections[1, ]),
 # so we manually make its standard errors a little smaller.  They are first in the list of
 # pollsters by alphabetical order:
 d1$y1_se <- d1$y1_se * sqrt(800 / 1500)
-
-# good discussion here on iterations and chains https://groups.google.com/forum/#!topic/stan-users/5WG51xKNSbA
-# The below is used on my 8 core machine.  For production chains=4, iter=1200
-system.time({
-  m1 <- stan(file = "method-statespace/ss-vectorized.stan", data = d1, 
-             chains = 4, iter = 1700, control = list(max_treedepth = 15))
-}) 
-# with 1500 iterations per chain this takes about 11 hours  and still gets a warning that more 
-# iterations are needed per chain
-
-
-
-save(m1, file = glue("data/m1-{Sys.Date()}.rda"), compress = "xz")
-
-

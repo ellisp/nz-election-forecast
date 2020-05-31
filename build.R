@@ -1,5 +1,6 @@
 source("setup/functionality.R")
 
+fit_model <- FALSE
 
 ThisElection <- "2020-09-19"
 
@@ -8,10 +9,13 @@ electionday <- tibble(
 )
 
 source("method-statespace/prior.R")
-
+source("method-statespace/prep.R")
 #================state space model==================
-# caution - takes more than an hour, has about 20,000 parameters to estimate:
-system.time({source("method-statespace/prep-and-fit.R")})  # about 80 minutes on 12 July 2017
+# caution - takes more than 18 hours, has about 30,000+ parameters to estimate:
+
+if(fit_model){
+  system.time({source("method-statespace/fit.R")})  # about 80 minutes on 12 July 2017
+}
 
 source("method-statespace/ss-diagnostics.R")
 source("method-statespace/results.R")

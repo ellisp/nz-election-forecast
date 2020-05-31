@@ -156,8 +156,8 @@ simulate_seats <- function(sims, prefix, ThisElection){
           scale_y_continuous("Chance of happening", label = percent, limits = c(0, 1.05)) +
           theme(legend.position = "none") +
           scale_fill_viridis(discrete = TRUE, option = "C", begin = 0.1, end = 0.9) +
-          labs(x = "", caption = "Source: https://ellisp.github.io") +
-          ggtitle(glue("Probable outcomes for the New Zealand {format(as.Date(ThisElection), '%d %B %Y')} General Election"),
+          labs(x = "", caption = "Source: http://freerangestats.info") +
+          ggtitle(glue("Probable outcomes for the New Zealand {format(as.Date(ThisElection), '%Y')} General Election"),
                   paste("Modelling based on polls from 2011 to", format(Sys.Date(), "%d %B %Y")))
   )
   dev.off()
@@ -171,7 +171,7 @@ simulate_seats <- function(sims, prefix, ThisElection){
           facet_wrap(~Party, scales = "free", ncol = 5) +
           geom_histogram(binwidth = 1, fill = "steelblue", alpha = 0.5, colour = "steelblue") +
           labs(x = "Number of seats", y = "Probability",
-               caption = "http://ellisp.github.io") +
+               caption = "http://freerangestats.info") +
           ggtitle(glue("Simulated election outcomes for {format(as.Date(ThisElection), '%d %B %Y')}"),
                   "Forecasts based on opinion poll trends, calibrated to previous election outcomes"))
   dev.off()

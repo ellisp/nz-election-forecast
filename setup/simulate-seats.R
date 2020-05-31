@@ -19,19 +19,22 @@ simulate_seats <- function(sims, prefix, ThisElection){
     group_by(ID) %>%
     mutate(Vote = Vote / sum(Vote))
   
-  svg(paste0("./output/", prefix, "-vote-predictions-density.svg"), 9, 6)
-  print(sims_tidy %>%
-          ggplot(aes(x = Vote)) +
-          geom_density(fill = "darkgreen", alpha = 0.1, colour = "grey50") +
+  p1 <- sims_tidy %>%
+          ggplot(aes(x = Vote, fill = Party)) +
+          geom_density(alpha = 0.1, colour = NA) +
           facet_wrap(~Party, scales = "free") +
           scale_x_continuous(label = percent) +
+            scale_fill_manual(values = parties_v2) +
           labs(x = "Predicted party vote on election day", 
                y = "Likelihood",
                caption = "Source: http://freerangestats.info") +
           ggtitle(glue("Predicted party vote for the {format(as.Date(ThisElection), '%d %B %Y')} New Zealand General Election"),
                   "Simulations based on predictions from polling data")
-  )
-  dev.off()
+  
+  
+  svg_png(p1, paste0("./output/", prefix, "-vote-predictions-density"), 9, 6)
+  
+  
   
   # According to this commentary https://www.waateanews.com/waateanews/x_news/MjQ1NzU/Opinion/What-latest-Poll-means-for-the-Maori-Party?
   # the Maori Party have a chance of winning two Maori electorates
@@ -107,7 +110,7 @@ simulate_seats <- function(sims, prefix, ThisElection){
   
   #==================presentation=====================
   
-  p <- seats %>%
+  p2 <- seats %>%
     select(National, NatCoal, LabGreen, LabGreenNZFirst, NatCoalNZFirst) %>%
     gather(Coalition, Seats) %>%
     ggplot(aes(x = Seats, colour = Coalition, fill = Coalition)) +
@@ -119,11 +122,13 @@ simulate_seats <- function(sims, prefix, ThisElection){
     labs(caption = paste("Source: http://freerangestats.info; model", prefix),
          y = "Likelihood")
   
-  svg(paste0("./output/", prefix, "-results-density.svg"), 9, 4)
-  print(direct.label(p, "top.bumpup"))
-  dev.off()
+  pf2 <- function(){
+    print(direct.label(p2, "top.bumpup"))  
+  }
   
+  svg_png(pf2, paste0("./output/", prefix, "-results-density"), 9, 4)
   
+
   
   png(paste0("./output/", prefix, "-results-pairs.png"), 8 * 300, 7 * 300, res = 300)
   par(family = thefont, bty = "n", font.main = 1)
@@ -145,8 +150,8 @@ simulate_seats <- function(sims, prefix, ThisElection){
                 mean((LabGreen + NZ_First) == Total / 2))
   
   
-  svg(paste0("./output/", prefix, "-final-chances-bar.svg"), 8, 3)
-  print(chances %>%
+  
+  p3 <- chances %>%
           gather(outcome, prob) %>%
           mutate(outcome = factor(outcome, levels = names(chances)[c(1,2,5,4,3)])) %>%
           ggplot(aes(x = outcome, weight = prob, fill = outcome)) +
@@ -159,11 +164,12 @@ simulate_seats <- function(sims, prefix, ThisElection){
           labs(x = "", caption = "Source: http://freerangestats.info") +
           ggtitle(glue("Probable outcomes for the New Zealand {format(as.Date(ThisElection), '%Y')} General Election"),
                   paste("Modelling based on polls from 2011 to", format(Sys.Date(), "%d %B %Y")))
-  )
-  dev.off()
   
-  svg(paste0("./output/", prefix, "-final-chances-histogram.svg"), 8, 4)
-  print(seats %>%
+  svg_png(p3, paste0("./output/", prefix, "-final-chances-bar"), 8, 3)
+  
+  
+  
+  p4 <- seats %>%
           gather(Party, Number) %>%
           mutate(Party = gsub("_", " ", Party)) %>%
           mutate(Party = fct_reorder(Party, Number)) %>%
@@ -173,8 +179,9 @@ simulate_seats <- function(sims, prefix, ThisElection){
           labs(x = "Number of seats", y = "Probability",
                caption = "http://freerangestats.info") +
           ggtitle(glue("Simulated election outcomes for {format(as.Date(ThisElection), '%d %B %Y')}"),
-                  "Forecasts based on opinion poll trends, calibrated to previous election outcomes"))
-  dev.off()
+                  "Forecasts based on opinion poll trends, calibrated to previous election outcomes")
+  
+  svg_png(p4, paste0("./output/", prefix, "-final-chances-histogram"), 8, 4)
   
   return(seats)
   

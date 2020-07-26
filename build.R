@@ -2,7 +2,7 @@ source("setup/functionality.R")
 
 # Need this to be TRUE at least the first time you run the model, and whenever there is a new poll 
 # available in nzelect
-fit_model <- FALSE
+fit_model <- TRUE
 
 ThisElection <- "2020-09-19"
 

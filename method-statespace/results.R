@@ -20,15 +20,17 @@ p1 <- s1 %>%
   ggplot(aes(x = day, y = mean, colour = Party, fill = Party)) +
   geom_point(data = gather(polls2, Party, VotingIntention, -Pollster, -MidDate, -ElectionYear, -MidDateNumber),
              aes(x = MidDate, y = VotingIntention), colour = "black", size = 0.5) +
+  geom_vline(xintercept = as.numeric(election_dates), colour = "grey60") +
   geom_line(colour = "black") +
   geom_ribbon(aes(ymin = `2.5%`, ymax = `97.5%`), alpha = 0.3, colour = NA) +
   scale_colour_manual(values = parties_v2) +
   scale_fill_manual(values = parties_v2) +
   labs(x = "", y = "Party vote") +
   facet_wrap(~Party, scales = "free_y") +
-  theme(legend.position= "none") +
+  theme(legend.position= "none",
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank()) +
   scale_y_continuous(label = percent_format(accuracy = 1)) +
-  geom_vline(xintercept = as.numeric(election_dates), colour = "black") +
   ggtitle("Voting intention from the 2011 to the 2020 elections",
           paste("State-space modelling based on polls from 2011 to", format(Sys.Date(), "%d %B %Y"))) +  
   labs(caption = "https://freerangestats.io/elections/elections.html")
@@ -76,7 +78,7 @@ sims_ss <- data.frame(rstan::extract(m1, "mu")$mu[ , sum(days_between_elections)
 names(sims_ss)[1:length(parties_ss)] <- parties_ss
 sims_ss <- select(sims_ss, -Other)
 
-seats_ss <- simulate_seats(sims_ss, prefix = "state-space", ThisElection = ThisElection)
+seats_ss <- simulate_seats(sims = sims_ss, prefix = "state-space", ThisElection = ThisElection)
 
 
 

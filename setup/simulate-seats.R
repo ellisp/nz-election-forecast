@@ -149,19 +149,20 @@ simulate_seats <- function(sims, prefix, ThisElection, seed = 123){
     summarise(`National ` = mean(National > Total / 2),
               `National needs a coalition similar to 2014` = mean(NatCoal > Total / 2 & National <= Total / 2),
               `Labour + Green win by themselves` = mean(LabGreen > Total / 2),
+              `Labour` = mean(Labour > Total / 2),
               `Either grouping needs\na coalition with NZ First` = 
-                mean((Green + Labour + NZ_First) >= Total / 2) - `Labour + Green win by themselves`,
+                mean((Green + Labour + NZ_First) >= Total / 2 - `Labour + Green win by themselves`),
               `Labour + Greens + NZ First\nexact tie with National-led coalition` =
-                mean((LabGreen + NZ_First) == Total / 2))
+                mean((LabGreen + NZ_First) == Total / 2) )
   
   
   
   p3 <- chances %>%
           gather(outcome, prob) %>%
-          mutate(outcome = factor(outcome, levels = names(chances)[c(1,2,5,4,3)])) %>%
+          mutate(outcome = factor(outcome, levels = names(chances)[c(1,2,6,5,3,4)])) %>%
           ggplot(aes(x = outcome, weight = prob, fill = outcome)) +
           geom_bar() +
-          geom_text(aes(label = paste0(round(prob * 100, 1), "%"), y = prob +.043), colour = "darkred") +
+          geom_text(aes(label = paste0(round(prob * 100, 1), "%"), y = prob +.043), colour = "darkred", size = 3) +
           coord_flip() +
           scale_y_continuous("Chance of happening", label = percent, limits = c(0, 1.05)) +
           theme(legend.position = "none") +

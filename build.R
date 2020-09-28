@@ -4,7 +4,7 @@ source("setup/functionality.R")
 # available in nzelect
 fit_model <- TRUE
 
-ThisElection <- "2020-09-19"
+ThisElection <- "2020-10-17"
 
 source("method-statespace/prior.R")
 source("method-statespace/prep.R")

@@ -49,16 +49,10 @@ svg_png(p1f, "./output/state-space-ribbons", w = 10, h = 6)
 # standard deviation - in percentage points (ie not proportions)
 # of the daily innovations
 summary(m1, pars = "sigma")$summary %>%
-  (function(x){round( x * 100, 3)}) %>%
+  (function(x){round( x * 100, 4)}) %>%
   as_tibble() %>%
   select(mean, se_mean) %>%
   mutate(party = parties_ss)
-# The main difference between the GAM model and the state space model
-# is that the state space model lets the major parties latent vote
-# change much quicker.  So as at end of June 2017, the National vote
-# bounces up (along with the budget bounce) in the state space model,
-# whereas the GAM model still has them trending downwards.
-
 
 # house effects
 p2 <- data.frame(d = round(summary(m1, pars = "d")$summary[, "mean"] * 100, 2),

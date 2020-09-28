@@ -148,12 +148,12 @@ simulate_seats <- function(sims, prefix, ThisElection, seed = 123){
   chances <- seats %>%
     summarise(`National ` = mean(National > Total / 2),
               `National needs a coalition similar to 2014` = mean(NatCoal > Total / 2 & National <= Total / 2),
-              `Labour + Green win by themselves` = mean(LabGreen > Total / 2),
+              `Labour + Green win by themselves` = mean(LabGreen > (Total / 2)),
               `Labour` = mean(Labour > Total / 2),
               `Either grouping needs\na coalition with NZ First` = 
-                mean((Green + Labour + NZ_First) >= Total / 2 - `Labour + Green win by themselves`),
+                mean((LabGreen + NZ_First) >= (Total / 2) & (LabGreen <= Total / 2)),
               `Labour + Greens + NZ First\nexact tie with National-led coalition` =
-                mean((LabGreen + NZ_First) == Total / 2) )
+                mean((LabGreen + NZ_First) == Total / 2))
   
   
   

@@ -58,7 +58,7 @@ simulate_seats <- function(sims, prefix, ThisElection, seed = 123){
   # almost certainly above the 5% threshold anyway, so we don't bother to simulate Northland
   filler <- data.frame(
     party = c("Green", "NZ First"),
-    seats = c(0, 1),
+    seats = c(0, 0),
     sim = rep(1:n, each = 2)
   )
   
